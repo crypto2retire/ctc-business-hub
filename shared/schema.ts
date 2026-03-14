@@ -13,8 +13,8 @@ export const customers = pgTable("customers", {
   state: text("state"),
   zip: text("zip"),
   notes: text("notes"),
-  source: text("source"), // lead source
-  squareCustomerId: text("square_customer_id"), // imported from Square
+  source: text("source"),
+  squareCustomerId: text("square_customer_id"),
 });
 
 export const insertCustomerSchema = createInsertSchema(customers).omit({ id: true });
@@ -27,7 +27,7 @@ export const jobs = pgTable("jobs", {
   customerId: integer("customer_id").notNull(),
   title: text("title").notNull(),
   serviceType: text("service_type"),
-  status: text("status").notNull().default("lead"), // lead | scheduled | in_progress | completed | cancelled
+  status: text("status").notNull().default("lead"),
   estimateLow: real("estimate_low"),
   estimateHigh: real("estimate_high"),
   finalPrice: real("final_price"),
@@ -61,8 +61,8 @@ export const communications = pgTable("communications", {
   id: serial("id").primaryKey(),
   jobId: integer("job_id"),
   customerId: integer("customer_id"),
-  type: text("type").notNull(), // sms | email
-  direction: text("direction").notNull().default("outbound"), // outbound | inbound
+  type: text("type").notNull(),
+  direction: text("direction").notNull().default("outbound"),
   subject: text("subject"),
   message: text("message").notNull(),
   template: text("template"),
@@ -79,7 +79,7 @@ export const invoices = pgTable("invoices", {
   invoiceNumber: text("invoice_number").notNull(),
   customerId: integer("customer_id").notNull(),
   jobId: integer("job_id"),
-  status: text("status").notNull().default("draft"), // draft | sent | paid | overdue | cancelled
+  status: text("status").notNull().default("draft"),
   issueDate: text("issue_date").notNull(),
   dueDate: text("due_date").notNull(),
   subtotal: real("subtotal").notNull().default(0),
@@ -90,7 +90,7 @@ export const invoices = pgTable("invoices", {
   amountPaid: real("amount_paid").notNull().default(0),
   balanceDue: real("balance_due").notNull().default(0),
   notes: text("notes"),
-  paymentMethod: text("payment_method"), // cash | check | square | venmo | other
+  paymentMethod: text("payment_method"),
   squarePaymentId: text("square_payment_id"),
   paidAt: timestamp("paid_at"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -117,8 +117,8 @@ export type InvoiceLineItem = typeof invoiceLineItems.$inferSelect;
 // ── Square Integration ────────────────────────────────────────────────────────
 export const squareImports = pgTable("square_imports", {
   id: serial("id").primaryKey(),
-  type: text("type").notNull(), // customers | orders
-  status: text("status").notNull().default("pending"), // pending | running | completed | failed
+  type: text("type").notNull(),
+  status: text("status").notNull().default("pending"),
   recordsImported: integer("records_imported").notNull().default(0),
   totalRecords: integer("total_records").notNull().default(0),
   startedAt: timestamp("started_at").defaultNow(),
