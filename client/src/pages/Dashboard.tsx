@@ -83,7 +83,7 @@ export default function Dashboard() {
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Card key={i} className="border-[#2a2d35] bg-[#1e2128]">
+            <Card key={i} className="border-[#2d3344] bg-[#1d2332]">
               <CardContent className="p-5">
                 <div className="animate-pulse space-y-3">
                   <div className="h-3 bg-slate-700/50 rounded w-24" />
@@ -96,7 +96,7 @@ export default function Dashboard() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {cards.map((card) => (
-            <Card key={card.title} className="border-[#2a2d35] bg-[#1e2128] hover:border-[#363940] transition-all duration-200 group">
+            <Card key={card.title} className="border-[#2d3344] bg-[#1d2332] hover:border-[#363d4f] transition-all duration-200 group">
               <CardContent className="p-5">
                 <div className="flex items-start justify-between">
                   <div className="space-y-3">

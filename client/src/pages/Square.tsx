@@ -91,7 +91,7 @@ export default function Square() {
         </div>
       </div>
 
-      <Card className="border-[#2a2d35] bg-[#1e2128]">
+      <Card className="border-[#2d3344] bg-[#1d2332]">
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
             <Zap className="w-4 h-4 text-orange-400" /> Connection Status
@@ -106,7 +106,7 @@ export default function Square() {
               <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                 <CheckCircle2 className="w-3.5 h-3.5" /> Connected
               </span>
-              <Button variant="outline" size="sm" className="border-[#2a2d35] bg-transparent text-slate-300 hover:bg-red-500/5 hover:text-red-400 hover:border-red-500/20" onClick={() => disconnectMutation.mutate()}>
+              <Button variant="outline" size="sm" className="border-[#2d3344] bg-transparent text-slate-300 hover:bg-red-500/5 hover:text-red-400 hover:border-red-500/20" onClick={() => disconnectMutation.mutate()}>
                 <Unplug className="w-4 h-4 mr-2" /> Disconnect
               </Button>
             </div>
@@ -117,7 +117,7 @@ export default function Square() {
                 type="password"
                 value={accessToken}
                 onChange={(e) => setAccessToken(e.target.value)}
-                className="max-w-md bg-[#151821] border-[#2a2d35] text-white placeholder:text-slate-600"
+                className="max-w-md bg-[#161b28] border-[#2d3344] text-white placeholder:text-slate-600"
               />
               <Button className="bg-orange-500 hover:bg-orange-600 text-white border-0" onClick={() => connectMutation.mutate(accessToken)} disabled={!accessToken || connectMutation.isPending}>
                 Connect
@@ -129,7 +129,7 @@ export default function Square() {
 
       {connected && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <Card className="border-[#2a2d35] bg-[#1e2128] hover:border-[#363940] transition-all duration-200">
+          <Card className="border-[#2d3344] bg-[#1d2332] hover:border-[#363d4f] transition-all duration-200">
             <CardHeader>
               <CardTitle className="text-sm text-white flex items-center gap-2"><Users className="w-4 h-4 text-blue-400" /> Import Customers</CardTitle>
               <CardDescription className="text-slate-400 text-xs">Pull customer records from your Square account</CardDescription>
@@ -142,7 +142,7 @@ export default function Square() {
             </CardContent>
           </Card>
 
-          <Card className="border-[#2a2d35] bg-[#1e2128] hover:border-[#363940] transition-all duration-200">
+          <Card className="border-[#2d3344] bg-[#1d2332] hover:border-[#363d4f] transition-all duration-200">
             <CardHeader>
               <CardTitle className="text-sm text-white flex items-center gap-2"><ShoppingCart className="w-4 h-4 text-emerald-400" /> Import Sales</CardTitle>
               <CardDescription className="text-slate-400 text-xs">Pull completed orders and create job records</CardDescription>
@@ -158,14 +158,14 @@ export default function Square() {
       )}
 
       {imports.length > 0 && (
-        <Card className="border-[#2a2d35] bg-[#1e2128] overflow-hidden">
+        <Card className="border-[#2d3344] bg-[#1d2332] overflow-hidden">
           <CardHeader>
             <CardTitle className="text-sm text-white">Import History</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <Table>
               <TableHeader>
-                <TableRow className="border-[#2a2d35] hover:bg-transparent">
+                <TableRow className="border-[#2d3344] hover:bg-transparent">
                   <TableHead className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Type</TableHead>
                   <TableHead className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Status</TableHead>
                   <TableHead className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Records</TableHead>
@@ -176,7 +176,7 @@ export default function Square() {
               </TableHeader>
               <TableBody>
                 {imports.map((imp, i) => (
-                  <TableRow key={imp.id} className={`border-[#2a2d35] hover:bg-white/[0.02] transition-colors ${i % 2 === 1 ? "bg-white/[0.01]" : ""}`}>
+                  <TableRow key={imp.id} className={`border-[#2d3344] hover:bg-white/[0.02] transition-colors ${i % 2 === 1 ? "bg-white/[0.01]" : ""}`}>
                     <TableCell className="text-white capitalize font-medium">{imp.type}</TableCell>
                     <TableCell>
                       <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium border ${statusStyle[imp.status] ?? ""}`}>

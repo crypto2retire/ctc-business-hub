@@ -117,24 +117,24 @@ export default function Customers() {
               <Plus className="w-4 h-4 mr-2" />Add Customer
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-[#1e2128] border-[#2a2d35]">
+          <DialogContent className="bg-[#1d2332] border-[#2d3344]">
             <DialogHeader>
               <DialogTitle className="text-white">{editingCustomer ? "Edit Customer" : "New Customer"}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <div><Label htmlFor="name" className="text-slate-300">Name *</Label><Input id="name" name="name" required defaultValue={editingCustomer?.name ?? ""} className="bg-[#151821] border-[#2a2d35] text-white" /></div>
-                <div><Label htmlFor="phone" className="text-slate-300">Phone *</Label><Input id="phone" name="phone" required defaultValue={editingCustomer?.phone ?? ""} className="bg-[#151821] border-[#2a2d35] text-white" /></div>
-                <div><Label htmlFor="email" className="text-slate-300">Email</Label><Input id="email" name="email" type="email" defaultValue={editingCustomer?.email ?? ""} className="bg-[#151821] border-[#2a2d35] text-white" /></div>
-                <div><Label htmlFor="source" className="text-slate-300">Source</Label><Input id="source" name="source" defaultValue={editingCustomer?.source ?? ""} className="bg-[#151821] border-[#2a2d35] text-white" /></div>
+                <div><Label htmlFor="name" className="text-slate-300">Name *</Label><Input id="name" name="name" required defaultValue={editingCustomer?.name ?? ""} className="bg-[#161b28] border-[#2d3344] text-white" /></div>
+                <div><Label htmlFor="phone" className="text-slate-300">Phone *</Label><Input id="phone" name="phone" required defaultValue={editingCustomer?.phone ?? ""} className="bg-[#161b28] border-[#2d3344] text-white" /></div>
+                <div><Label htmlFor="email" className="text-slate-300">Email</Label><Input id="email" name="email" type="email" defaultValue={editingCustomer?.email ?? ""} className="bg-[#161b28] border-[#2d3344] text-white" /></div>
+                <div><Label htmlFor="source" className="text-slate-300">Source</Label><Input id="source" name="source" defaultValue={editingCustomer?.source ?? ""} className="bg-[#161b28] border-[#2d3344] text-white" /></div>
               </div>
-              <div><Label htmlFor="address" className="text-slate-300">Address</Label><Input id="address" name="address" defaultValue={editingCustomer?.address ?? ""} className="bg-[#151821] border-[#2a2d35] text-white" /></div>
+              <div><Label htmlFor="address" className="text-slate-300">Address</Label><Input id="address" name="address" defaultValue={editingCustomer?.address ?? ""} className="bg-[#161b28] border-[#2d3344] text-white" /></div>
               <div className="grid grid-cols-3 gap-4">
-                <div><Label htmlFor="city" className="text-slate-300">City</Label><Input id="city" name="city" defaultValue={editingCustomer?.city ?? ""} className="bg-[#151821] border-[#2a2d35] text-white" /></div>
-                <div><Label htmlFor="state" className="text-slate-300">State</Label><Input id="state" name="state" defaultValue={editingCustomer?.state ?? ""} className="bg-[#151821] border-[#2a2d35] text-white" /></div>
-                <div><Label htmlFor="zip" className="text-slate-300">ZIP</Label><Input id="zip" name="zip" defaultValue={editingCustomer?.zip ?? ""} className="bg-[#151821] border-[#2a2d35] text-white" /></div>
+                <div><Label htmlFor="city" className="text-slate-300">City</Label><Input id="city" name="city" defaultValue={editingCustomer?.city ?? ""} className="bg-[#161b28] border-[#2d3344] text-white" /></div>
+                <div><Label htmlFor="state" className="text-slate-300">State</Label><Input id="state" name="state" defaultValue={editingCustomer?.state ?? ""} className="bg-[#161b28] border-[#2d3344] text-white" /></div>
+                <div><Label htmlFor="zip" className="text-slate-300">ZIP</Label><Input id="zip" name="zip" defaultValue={editingCustomer?.zip ?? ""} className="bg-[#161b28] border-[#2d3344] text-white" /></div>
               </div>
-              <div><Label htmlFor="notes" className="text-slate-300">Notes</Label><Textarea id="notes" name="notes" defaultValue={editingCustomer?.notes ?? ""} className="bg-[#151821] border-[#2a2d35] text-white" /></div>
+              <div><Label htmlFor="notes" className="text-slate-300">Notes</Label><Textarea id="notes" name="notes" defaultValue={editingCustomer?.notes ?? ""} className="bg-[#161b28] border-[#2d3344] text-white" /></div>
               <Button type="submit" className="w-full bg-orange-500 hover:bg-orange-600 text-white border-0" disabled={createMutation.isPending || updateMutation.isPending}>
                 {editingCustomer ? "Update" : "Create"} Customer
               </Button>
@@ -145,14 +145,14 @@ export default function Customers() {
 
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-        <Input placeholder="Search customers..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 bg-[#1e2128] border-[#2a2d35] text-white placeholder:text-slate-500" />
+        <Input placeholder="Search customers..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 bg-[#1d2332] border-[#2d3344] text-white placeholder:text-slate-500" />
       </div>
 
-      <Card className="border-[#2a2d35] bg-[#1e2128] overflow-hidden">
+      <Card className="border-[#2d3344] bg-[#1d2332] overflow-hidden">
         <CardContent className="p-0">
           <Table>
             <TableHeader>
-              <TableRow className="border-[#2a2d35] hover:bg-transparent">
+              <TableRow className="border-[#2d3344] hover:bg-transparent">
                 <TableHead className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Name</TableHead>
                 <TableHead className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Phone</TableHead>
                 <TableHead className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Email</TableHead>
@@ -163,11 +163,11 @@ export default function Customers() {
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                <TableRow className="border-[#2a2d35]"><TableCell colSpan={6} className="text-center py-12 text-slate-500">Loading...</TableCell></TableRow>
+                <TableRow className="border-[#2d3344]"><TableCell colSpan={6} className="text-center py-12 text-slate-500">Loading...</TableCell></TableRow>
               ) : filtered.length === 0 ? (
-                <TableRow className="border-[#2a2d35]"><TableCell colSpan={6} className="text-center py-12 text-slate-500">No customers found</TableCell></TableRow>
+                <TableRow className="border-[#2d3344]"><TableCell colSpan={6} className="text-center py-12 text-slate-500">No customers found</TableCell></TableRow>
               ) : filtered.map((c, i) => (
-                <TableRow key={c.id} className={`border-[#2a2d35] hover:bg-white/[0.02] transition-colors ${i % 2 === 1 ? "bg-white/[0.01]" : ""}`}>
+                <TableRow key={c.id} className={`border-[#2d3344] hover:bg-white/[0.02] transition-colors ${i % 2 === 1 ? "bg-white/[0.01]" : ""}`}>
                   <TableCell className="font-medium text-white">{c.name}</TableCell>
                   <TableCell className="text-slate-300">{c.phone}</TableCell>
                   <TableCell className="text-slate-300">{c.email ?? <span className="text-slate-600">-</span>}</TableCell>

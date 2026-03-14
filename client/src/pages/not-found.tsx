@@ -6,7 +6,7 @@ import { ArrowLeft } from "lucide-react";
 export default function NotFound() {
   return (
     <div className="flex items-center justify-center min-h-screen p-6">
-      <Card className="max-w-md w-full border-[#2a2d35] bg-[#1e2128]">
+      <Card className="max-w-md w-full border-[#2d3344] bg-[#1d2332]">
         <CardContent className="pt-10 pb-8 text-center space-y-5">
           <div className="text-6xl font-bold text-orange-500">404</div>
           <p className="text-slate-400 text-sm">The page you're looking for doesn't exist</p>

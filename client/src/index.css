@@ -4,50 +4,73 @@
 
 @layer base {
   :root {
-    /* CTC Dark Theme - Orange Accent */
-    --background: 225 16% 7%;       /* #0f1117 */
-    --foreground: 0 0% 95%;         /* white-ish */
-    --card: 224 14% 14%;            /* #1e2128 */
-    --card-foreground: 0 0% 95%;
-    --card-border: 224 12% 20%;     /* #2a2d35 */
-    --popover: 224 14% 14%;
-    --popover-foreground: 0 0% 95%;
-    --popover-border: 224 12% 20%;
-    --primary: 25 95% 53%;          /* #f97316 orange */
-    --primary-foreground: 0 0% 100%;
-    --secondary: 224 14% 18%;
-    --secondary-foreground: 215 20% 75%;
-    --muted: 224 14% 18%;
-    --muted-foreground: 215 17% 63%; /* #94a3b8 */
-    --accent: 25 95% 53%;           /* orange */
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 224 12% 20%;          /* #2a2d35 */
-    --input: 224 12% 20%;
-    --ring: 25 95% 53%;             /* orange ring */
-    --radius: 0.625rem;
+    /* Exact Perplexity CTC Business Hub dark theme */
+    --button-outline: rgba(255, 255, 255, 0.1);
+    --badge-outline: rgba(255, 255, 255, 0.05);
+    --opaque-button-border-intensity: 9;
+    --elevate-1: rgba(255, 255, 255, 0.04);
+    --elevate-2: rgba(255, 255, 255, 0.09);
 
-    /* Chart colors */
-    --chart-1: 25 95% 53%;          /* orange */
-    --chart-2: 142 71% 45%;         /* green */
-    --chart-3: 47 96% 53%;          /* yellow */
-    --chart-4: 199 89% 48%;         /* blue */
-    --chart-5: 280 65% 60%;         /* purple */
-
-    /* Sidebar */
-    --sidebar-background: 225 15% 12%;  /* #1a1d23 */
-    --sidebar-foreground: 215 20% 85%;
-    --sidebar-primary: 25 95% 53%;      /* orange */
+    --background: 220 30% 10%;
+    --foreground: 220 10% 90%;
+    --border: 220 20% 22%;
+    --card: 220 28% 13%;
+    --card-foreground: 220 10% 90%;
+    --card-border: 220 20% 18%;
+    --sidebar: 220 28% 11%;
+    --sidebar-background: 220 28% 11%;
+    --sidebar-foreground: 220 10% 90%;
+    --sidebar-border: 220 20% 18%;
+    --sidebar-primary: 16 90% 46%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 225 15% 18%;
-    --sidebar-accent-foreground: 0 0% 95%;
-    --sidebar-border: 224 12% 18%;
-    --sidebar-ring: 25 95% 53%;
+    --sidebar-accent: 220 25% 18%;
+    --sidebar-accent-foreground: 220 10% 90%;
+    --sidebar-ring: 16 90% 46%;
+    --popover: 220 28% 13%;
+    --popover-foreground: 220 10% 90%;
+    --popover-border: 220 20% 22%;
+    --primary: 16 90% 46%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 25% 18%;
+    --secondary-foreground: 220 10% 80%;
+    --muted: 220 25% 18%;
+    --muted-foreground: 220 10% 55%;
+    --accent: 16 90% 46%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --input: 220 20% 22%;
+    --ring: 16 90% 46%;
+    --chart-1: 16 90% 46%;
+    --chart-2: 220 60% 55%;
+    --chart-3: 173 58% 39%;
+    --chart-4: 43 74% 49%;
+    --chart-5: 27 87% 55%;
+    --radius: 0.5rem;
 
     /* Font */
-    --font-sans: 'Inter', 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+    --font-sans: 'General Sans', 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-serif: Georgia, serif;
+    --font-mono: Menlo, monospace;
+
+    /* Flat shadows for dark theme */
+    --shadow-2xs: 0px 2px 0px 0px hsl(0 0% 0% / 0);
+    --shadow-xs: 0px 2px 0px 0px hsl(0 0% 0% / 0);
+    --shadow-sm: 0px 2px 0px 0px hsl(0 0% 0% / 0), 0px 1px 2px -1px hsl(0 0% 0% / 0);
+    --shadow: 0px 2px 0px 0px hsl(0 0% 0% / 0), 0px 1px 2px -1px hsl(0 0% 0% / 0);
+    --shadow-md: 0px 2px 0px 0px hsl(0 0% 0% / 0), 0px 2px 4px -1px hsl(0 0% 0% / 0);
+    --shadow-lg: 0px 2px 0px 0px hsl(0 0% 0% / 0), 0px 4px 6px -1px hsl(0 0% 0% / 0);
+    --shadow-xl: 0px 2px 0px 0px hsl(0 0% 0% / 0), 0px 8px 10px -1px hsl(0 0% 0% / 0);
+    --shadow-2xl: 0px 2px 0px 0px hsl(0 0% 0% / 0);
+
+    /* Border computations */
+    --primary-border: hsl(var(--primary));
+    --secondary-border: hsl(var(--secondary));
+    --muted-border: hsl(var(--muted));
+    --accent-border: hsl(var(--accent));
+    --destructive-border: hsl(var(--destructive));
+    --sidebar-primary-border: hsl(var(--sidebar-primary));
+    --sidebar-accent-border: hsl(var(--sidebar-accent));
   }
 }
 
@@ -57,17 +80,51 @@
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-sans);
   }
-  /* Force dark scrollbar */
+
+  /* Dark scrollbar */
   ::-webkit-scrollbar { width: 8px; height: 8px; }
-  ::-webkit-scrollbar-track { background: hsl(225 16% 7%); }
-  ::-webkit-scrollbar-thumb { background: hsl(224 12% 25%); border-radius: 4px; }
-  ::-webkit-scrollbar-thumb:hover { background: hsl(224 12% 35%); }
+  ::-webkit-scrollbar-track { background: hsl(220 30% 10%); }
+  ::-webkit-scrollbar-thumb { background: hsl(220 20% 22%); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: hsl(220 20% 30%); }
 }
 
-/* Smooth transitions on interactive elements */
-@layer utilities {
-  .transition-hover {
-    @apply transition-all duration-200 ease-out;
+/* Perplexity hover-elevate system */
+@layer components {
+  .hover-elevate:not(.no-default-hover-elevate),
+  .active-elevate:not(.no-default-active-elevate),
+  .hover-elevate-2:not(.no-default-hover-elevate),
+  .active-elevate-2:not(.no-default-active-elevate) {
+    position: relative;
+    z-index: 0;
+  }
+
+  .hover-elevate:not(.no-default-hover-elevate):after,
+  .active-elevate:not(.no-default-active-elevate):after,
+  .hover-elevate-2:not(.no-default-hover-elevate):after,
+  .active-elevate-2:not(.no-default-active-elevate):after {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    z-index: 999;
+  }
+
+  .hover-elevate:hover:not(.no-default-hover-elevate):after,
+  .active-elevate:active:not(.no-default-active-elevate):after {
+    background-color: var(--elevate-1);
+  }
+
+  .hover-elevate-2:hover:not(.no-default-hover-elevate):after,
+  .active-elevate-2:active:not(.no-default-active-elevate):after {
+    background-color: var(--elevate-2);
+  }
+
+  .border.hover-elevate:not(.no-hover-interaction-elevate):after,
+  .border.active-elevate:not(.no-active-interaction-elevate):after,
+  .border.hover-elevate-2:not(.no-hover-interaction-elevate):after,
+  .border.active-elevate-2:not(.no-active-interaction-elevate):after {
+    inset: -1px;
   }
 }
 

@@ -110,23 +110,23 @@ export default function Jobs() {
               <Plus className="w-4 h-4 mr-2" />New Job
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-[#1e2128] border-[#2a2d35]">
+          <DialogContent className="bg-[#1d2332] border-[#2d3344]">
             <DialogHeader><DialogTitle className="text-white">Create Job</DialogTitle></DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div><Label className="text-slate-300">Customer *</Label>
                 <Select name="customerId" required>
-                  <SelectTrigger className="bg-[#151821] border-[#2a2d35] text-white"><SelectValue placeholder="Select customer" /></SelectTrigger>
-                  <SelectContent className="bg-[#1e2128] border-[#2a2d35]">
+                  <SelectTrigger className="bg-[#161b28] border-[#2d3344] text-white"><SelectValue placeholder="Select customer" /></SelectTrigger>
+                  <SelectContent className="bg-[#1d2332] border-[#2d3344]">
                     {customers.map((c) => <SelectItem key={c.id} value={String(c.id)} className="text-slate-200">{c.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
-              <div><Label className="text-slate-300">Title *</Label><Input name="title" required className="bg-[#151821] border-[#2a2d35] text-white" /></div>
+              <div><Label className="text-slate-300">Title *</Label><Input name="title" required className="bg-[#161b28] border-[#2d3344] text-white" /></div>
               <div className="grid grid-cols-2 gap-4">
                 <div><Label className="text-slate-300">Service Type</Label>
                   <Select name="serviceType">
-                    <SelectTrigger className="bg-[#151821] border-[#2a2d35] text-white"><SelectValue placeholder="Select type" /></SelectTrigger>
-                    <SelectContent className="bg-[#1e2128] border-[#2a2d35]">
+                    <SelectTrigger className="bg-[#161b28] border-[#2d3344] text-white"><SelectValue placeholder="Select type" /></SelectTrigger>
+                    <SelectContent className="bg-[#1d2332] border-[#2d3344]">
                       <SelectItem value="Junk Removal" className="text-slate-200">Junk Removal</SelectItem>
                       <SelectItem value="Garage Cleanout" className="text-slate-200">Garage Cleanout</SelectItem>
                       <SelectItem value="Estate Cleanout" className="text-slate-200">Estate Cleanout</SelectItem>
@@ -137,8 +137,8 @@ export default function Jobs() {
                 </div>
                 <div><Label className="text-slate-300">Status</Label>
                   <Select name="status" defaultValue="lead">
-                    <SelectTrigger className="bg-[#151821] border-[#2a2d35] text-white"><SelectValue /></SelectTrigger>
-                    <SelectContent className="bg-[#1e2128] border-[#2a2d35]">
+                    <SelectTrigger className="bg-[#161b28] border-[#2d3344] text-white"><SelectValue /></SelectTrigger>
+                    <SelectContent className="bg-[#1d2332] border-[#2d3344]">
                       <SelectItem value="lead" className="text-slate-200">Lead</SelectItem>
                       <SelectItem value="scheduled" className="text-slate-200">Scheduled</SelectItem>
                       <SelectItem value="in_progress" className="text-slate-200">In Progress</SelectItem>
@@ -148,10 +148,10 @@ export default function Jobs() {
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div><Label className="text-slate-300">Date</Label><Input name="scheduledDate" type="date" className="bg-[#151821] border-[#2a2d35] text-white" /></div>
-                <div><Label className="text-slate-300">Time</Label><Input name="scheduledTime" type="time" className="bg-[#151821] border-[#2a2d35] text-white" /></div>
+                <div><Label className="text-slate-300">Date</Label><Input name="scheduledDate" type="date" className="bg-[#161b28] border-[#2d3344] text-white" /></div>
+                <div><Label className="text-slate-300">Time</Label><Input name="scheduledTime" type="time" className="bg-[#161b28] border-[#2d3344] text-white" /></div>
               </div>
-              <div><Label className="text-slate-300">Notes</Label><Textarea name="notes" className="bg-[#151821] border-[#2a2d35] text-white" /></div>
+              <div><Label className="text-slate-300">Notes</Label><Textarea name="notes" className="bg-[#161b28] border-[#2d3344] text-white" /></div>
               <Button type="submit" className="w-full bg-orange-500 hover:bg-orange-600 text-white border-0" disabled={createMutation.isPending}>Create Job</Button>
             </form>
           </DialogContent>
@@ -160,14 +160,14 @@ export default function Jobs() {
 
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-        <Input placeholder="Search jobs..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 bg-[#1e2128] border-[#2a2d35] text-white placeholder:text-slate-500" />
+        <Input placeholder="Search jobs..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 bg-[#1d2332] border-[#2d3344] text-white placeholder:text-slate-500" />
       </div>
 
-      <Card className="border-[#2a2d35] bg-[#1e2128] overflow-hidden">
+      <Card className="border-[#2d3344] bg-[#1d2332] overflow-hidden">
         <CardContent className="p-0">
           <Table>
             <TableHeader>
-              <TableRow className="border-[#2a2d35] hover:bg-transparent">
+              <TableRow className="border-[#2d3344] hover:bg-transparent">
                 <TableHead className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Title</TableHead>
                 <TableHead className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Customer</TableHead>
                 <TableHead className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Service</TableHead>
@@ -179,11 +179,11 @@ export default function Jobs() {
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                <TableRow className="border-[#2a2d35]"><TableCell colSpan={7} className="text-center py-12 text-slate-500">Loading...</TableCell></TableRow>
+                <TableRow className="border-[#2d3344]"><TableCell colSpan={7} className="text-center py-12 text-slate-500">Loading...</TableCell></TableRow>
               ) : filtered.length === 0 ? (
-                <TableRow className="border-[#2a2d35]"><TableCell colSpan={7} className="text-center py-12 text-slate-500">No jobs found</TableCell></TableRow>
+                <TableRow className="border-[#2d3344]"><TableCell colSpan={7} className="text-center py-12 text-slate-500">No jobs found</TableCell></TableRow>
               ) : filtered.map((j, i) => (
-                <TableRow key={j.id} className={`border-[#2a2d35] hover:bg-white/[0.02] transition-colors ${i % 2 === 1 ? "bg-white/[0.01]" : ""}`}>
+                <TableRow key={j.id} className={`border-[#2d3344] hover:bg-white/[0.02] transition-colors ${i % 2 === 1 ? "bg-white/[0.01]" : ""}`}>
                   <TableCell className="font-medium text-white">{j.title}</TableCell>
                   <TableCell className="text-slate-300">{customerName(j.customerId)}</TableCell>
                   <TableCell className="text-slate-300">{j.serviceType ?? <span className="text-slate-600">-</span>}</TableCell>

@@ -77,13 +77,13 @@ export default function Communications() {
               <Plus className="w-4 h-4 mr-2" />Log Communication
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-[#1e2128] border-[#2a2d35]">
+          <DialogContent className="bg-[#1d2332] border-[#2d3344]">
             <DialogHeader><DialogTitle className="text-white">Log Communication</DialogTitle></DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div><Label className="text-slate-300">Customer</Label>
                 <Select name="customerId">
-                  <SelectTrigger className="bg-[#151821] border-[#2a2d35] text-white"><SelectValue placeholder="Select customer" /></SelectTrigger>
-                  <SelectContent className="bg-[#1e2128] border-[#2a2d35]">
+                  <SelectTrigger className="bg-[#161b28] border-[#2d3344] text-white"><SelectValue placeholder="Select customer" /></SelectTrigger>
+                  <SelectContent className="bg-[#1d2332] border-[#2d3344]">
                     {customers.map((c) => <SelectItem key={c.id} value={String(c.id)} className="text-slate-200">{c.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
@@ -91,8 +91,8 @@ export default function Communications() {
               <div className="grid grid-cols-2 gap-4">
                 <div><Label className="text-slate-300">Type *</Label>
                   <Select name="type" required defaultValue="sms">
-                    <SelectTrigger className="bg-[#151821] border-[#2a2d35] text-white"><SelectValue /></SelectTrigger>
-                    <SelectContent className="bg-[#1e2128] border-[#2a2d35]">
+                    <SelectTrigger className="bg-[#161b28] border-[#2d3344] text-white"><SelectValue /></SelectTrigger>
+                    <SelectContent className="bg-[#1d2332] border-[#2d3344]">
                       <SelectItem value="sms" className="text-slate-200">SMS</SelectItem>
                       <SelectItem value="email" className="text-slate-200">Email</SelectItem>
                     </SelectContent>
@@ -100,27 +100,27 @@ export default function Communications() {
                 </div>
                 <div><Label className="text-slate-300">Direction *</Label>
                   <Select name="direction" required defaultValue="outbound">
-                    <SelectTrigger className="bg-[#151821] border-[#2a2d35] text-white"><SelectValue /></SelectTrigger>
-                    <SelectContent className="bg-[#1e2128] border-[#2a2d35]">
+                    <SelectTrigger className="bg-[#161b28] border-[#2d3344] text-white"><SelectValue /></SelectTrigger>
+                    <SelectContent className="bg-[#1d2332] border-[#2d3344]">
                       <SelectItem value="outbound" className="text-slate-200">Outbound</SelectItem>
                       <SelectItem value="inbound" className="text-slate-200">Inbound</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
-              <div><Label className="text-slate-300">Subject</Label><Input name="subject" className="bg-[#151821] border-[#2a2d35] text-white" /></div>
-              <div><Label className="text-slate-300">Message *</Label><Textarea name="message" required rows={4} className="bg-[#151821] border-[#2a2d35] text-white" /></div>
+              <div><Label className="text-slate-300">Subject</Label><Input name="subject" className="bg-[#161b28] border-[#2d3344] text-white" /></div>
+              <div><Label className="text-slate-300">Message *</Label><Textarea name="message" required rows={4} className="bg-[#161b28] border-[#2d3344] text-white" /></div>
               <Button type="submit" className="w-full bg-orange-500 hover:bg-orange-600 text-white border-0" disabled={createMutation.isPending}>Log Communication</Button>
             </form>
           </DialogContent>
         </Dialog>
       </div>
 
-      <Card className="border-[#2a2d35] bg-[#1e2128] overflow-hidden">
+      <Card className="border-[#2d3344] bg-[#1d2332] overflow-hidden">
         <CardContent className="p-0">
           <Table>
             <TableHeader>
-              <TableRow className="border-[#2a2d35] hover:bg-transparent">
+              <TableRow className="border-[#2d3344] hover:bg-transparent">
                 <TableHead className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Type</TableHead>
                 <TableHead className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Direction</TableHead>
                 <TableHead className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Customer</TableHead>
@@ -131,11 +131,11 @@ export default function Communications() {
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                <TableRow className="border-[#2a2d35]"><TableCell colSpan={6} className="text-center py-12 text-slate-500">Loading...</TableCell></TableRow>
+                <TableRow className="border-[#2d3344]"><TableCell colSpan={6} className="text-center py-12 text-slate-500">Loading...</TableCell></TableRow>
               ) : comms.length === 0 ? (
-                <TableRow className="border-[#2a2d35]"><TableCell colSpan={6} className="text-center py-12 text-slate-500">No communications yet</TableCell></TableRow>
+                <TableRow className="border-[#2d3344]"><TableCell colSpan={6} className="text-center py-12 text-slate-500">No communications yet</TableCell></TableRow>
               ) : comms.map((c, i) => (
-                <TableRow key={c.id} className={`border-[#2a2d35] hover:bg-white/[0.02] transition-colors ${i % 2 === 1 ? "bg-white/[0.01]" : ""}`}>
+                <TableRow key={c.id} className={`border-[#2d3344] hover:bg-white/[0.02] transition-colors ${i % 2 === 1 ? "bg-white/[0.01]" : ""}`}>
                   <TableCell>
                     <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium border ${
                       c.type === "email" ? "bg-blue-500/10 text-blue-400 border-blue-500/20" : "bg-green-500/10 text-green-400 border-green-500/20"

@@ -109,18 +109,18 @@ export default function Invoices() {
               <Plus className="w-4 h-4 mr-2" />New Invoice
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-[#1e2128] border-[#2a2d35]">
+          <DialogContent className="bg-[#1d2332] border-[#2d3344]">
             <DialogHeader><DialogTitle className="text-white">Create Invoice</DialogTitle></DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div><Label className="text-slate-300">Customer *</Label>
                 <Select name="customerId" required>
-                  <SelectTrigger className="bg-[#151821] border-[#2a2d35] text-white"><SelectValue placeholder="Select customer" /></SelectTrigger>
-                  <SelectContent className="bg-[#1e2128] border-[#2a2d35]">
+                  <SelectTrigger className="bg-[#161b28] border-[#2d3344] text-white"><SelectValue placeholder="Select customer" /></SelectTrigger>
+                  <SelectContent className="bg-[#1d2332] border-[#2d3344]">
                     {customers.map((c) => <SelectItem key={c.id} value={String(c.id)} className="text-slate-200">{c.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
-              <div><Label className="text-slate-300">Total ($)</Label><Input name="total" type="number" step="0.01" required className="bg-[#151821] border-[#2a2d35] text-white" /></div>
+              <div><Label className="text-slate-300">Total ($)</Label><Input name="total" type="number" step="0.01" required className="bg-[#161b28] border-[#2d3344] text-white" /></div>
               <Button type="submit" className="w-full bg-orange-500 hover:bg-orange-600 text-white border-0" disabled={createMutation.isPending}>Create Invoice</Button>
             </form>
           </DialogContent>
@@ -129,14 +129,14 @@ export default function Invoices() {
 
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-        <Input placeholder="Search invoices..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 bg-[#1e2128] border-[#2a2d35] text-white placeholder:text-slate-500" />
+        <Input placeholder="Search invoices..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 bg-[#1d2332] border-[#2d3344] text-white placeholder:text-slate-500" />
       </div>
 
-      <Card className="border-[#2a2d35] bg-[#1e2128] overflow-hidden">
+      <Card className="border-[#2d3344] bg-[#1d2332] overflow-hidden">
         <CardContent className="p-0">
           <Table>
             <TableHeader>
-              <TableRow className="border-[#2a2d35] hover:bg-transparent">
+              <TableRow className="border-[#2d3344] hover:bg-transparent">
                 <TableHead className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Invoice #</TableHead>
                 <TableHead className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Customer</TableHead>
                 <TableHead className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Status</TableHead>
@@ -149,11 +149,11 @@ export default function Invoices() {
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                <TableRow className="border-[#2a2d35]"><TableCell colSpan={8} className="text-center py-12 text-slate-500">Loading...</TableCell></TableRow>
+                <TableRow className="border-[#2d3344]"><TableCell colSpan={8} className="text-center py-12 text-slate-500">Loading...</TableCell></TableRow>
               ) : filtered.length === 0 ? (
-                <TableRow className="border-[#2a2d35]"><TableCell colSpan={8} className="text-center py-12 text-slate-500">No invoices found</TableCell></TableRow>
+                <TableRow className="border-[#2d3344]"><TableCell colSpan={8} className="text-center py-12 text-slate-500">No invoices found</TableCell></TableRow>
               ) : filtered.map((inv, i) => (
-                <TableRow key={inv.id} className={`border-[#2a2d35] hover:bg-white/[0.02] transition-colors ${i % 2 === 1 ? "bg-white/[0.01]" : ""}`}>
+                <TableRow key={inv.id} className={`border-[#2d3344] hover:bg-white/[0.02] transition-colors ${i % 2 === 1 ? "bg-white/[0.01]" : ""}`}>
                   <TableCell className="font-mono font-medium text-white text-sm">{inv.invoiceNumber}</TableCell>
                   <TableCell className="text-slate-300">{customerName(inv.customerId)}</TableCell>
                   <TableCell>

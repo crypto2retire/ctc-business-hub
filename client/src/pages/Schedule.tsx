@@ -56,11 +56,11 @@ export default function Schedule() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="icon" className="border-[#2a2d35] bg-[#1e2128] text-slate-300 hover:bg-[#252830] hover:text-white h-9 w-9" onClick={() => setWeekOffset((w) => w - 1)}>
+          <Button variant="outline" size="icon" className="border-[#2d3344] bg-[#1d2332] text-slate-300 hover:bg-[#252b3a] hover:text-white h-9 w-9" onClick={() => setWeekOffset((w) => w - 1)}>
             <ChevronLeft className="w-4 h-4" />
           </Button>
-          <Button variant="outline" className="border-[#2a2d35] bg-[#1e2128] text-slate-300 hover:bg-[#252830] hover:text-white h-9 px-4 text-sm" onClick={() => setWeekOffset(0)}>Today</Button>
-          <Button variant="outline" size="icon" className="border-[#2a2d35] bg-[#1e2128] text-slate-300 hover:bg-[#252830] hover:text-white h-9 w-9" onClick={() => setWeekOffset((w) => w + 1)}>
+          <Button variant="outline" className="border-[#2d3344] bg-[#1d2332] text-slate-300 hover:bg-[#252b3a] hover:text-white h-9 px-4 text-sm" onClick={() => setWeekOffset(0)}>Today</Button>
+          <Button variant="outline" size="icon" className="border-[#2d3344] bg-[#1d2332] text-slate-300 hover:bg-[#252b3a] hover:text-white h-9 w-9" onClick={() => setWeekOffset((w) => w + 1)}>
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
@@ -73,7 +73,7 @@ export default function Schedule() {
           const isToday = formatDate(today) === dateStr;
 
           return (
-            <Card key={dateStr} className={`border-[#2a2d35] bg-[#1e2128] min-h-[180px] ${isToday ? "border-orange-500/40 shadow-lg shadow-orange-500/5" : "hover:border-[#363940]"} transition-all duration-200`}>
+            <Card key={dateStr} className={`border-[#2d3344] bg-[#1d2332] min-h-[180px] ${isToday ? "border-orange-500/40 shadow-lg shadow-orange-500/5" : "hover:border-[#363d4f]"} transition-all duration-200`}>
               <CardHeader className="p-3 pb-1">
                 <div className={`text-xs font-semibold uppercase tracking-wider ${isToday ? "text-orange-400" : "text-slate-500"}`}>
                   {day.toLocaleDateString("en-US", { weekday: "short" })}
@@ -86,7 +86,7 @@ export default function Schedule() {
                 {dayJobs.length === 0 ? (
                   <p className="text-[11px] text-slate-600 py-2">No jobs</p>
                 ) : dayJobs.map((j) => (
-                  <div key={j.id} className="p-2 rounded-lg bg-[#151821] border border-[#2a2d35] text-xs space-y-1.5 hover:border-[#363940] transition-colors">
+                  <div key={j.id} className="p-2 rounded-lg bg-[#161b28] border border-[#2d3344] text-xs space-y-1.5 hover:border-[#363d4f] transition-colors">
                     <div className="flex items-center gap-1.5">
                       <div className={`w-1.5 h-1.5 rounded-full ${statusDot[j.status] ?? "bg-slate-400"}`} />
                       <p className="font-medium text-white truncate">{j.title}</p>

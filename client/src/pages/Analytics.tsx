@@ -39,7 +39,7 @@ export default function Analytics() {
       {isLoading ? (
         <div className="grid grid-cols-3 gap-5">
           {Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i} className="border-[#2a2d35] bg-[#1e2128]">
+            <Card key={i} className="border-[#2d3344] bg-[#1d2332]">
               <CardContent className="p-5">
                 <div className="animate-pulse space-y-3">
                   <div className="h-3 bg-slate-700/50 rounded w-24" />
@@ -53,7 +53,7 @@ export default function Analytics() {
         <>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {stats.map((s) => (
-              <Card key={s.title} className="border-[#2a2d35] bg-[#1e2128] hover:border-[#363940] transition-all duration-200 group">
+              <Card key={s.title} className="border-[#2d3344] bg-[#1d2332] hover:border-[#363d4f] transition-all duration-200 group">
                 <CardContent className="p-5">
                   <div className="flex items-start justify-between">
                     <div className="space-y-3">
@@ -70,7 +70,7 @@ export default function Analytics() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-            <Card className="border-[#2a2d35] bg-[#1e2128]">
+            <Card className="border-[#2d3344] bg-[#1d2332]">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-semibold text-white flex items-center gap-2">
                   <TrendingUp className="w-4 h-4 text-orange-400" />
@@ -98,7 +98,7 @@ export default function Analytics() {
               </CardContent>
             </Card>
 
-            <Card className="border-[#2a2d35] bg-[#1e2128]">
+            <Card className="border-[#2d3344] bg-[#1d2332]">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-semibold text-white flex items-center gap-2">
                   <Search className="w-4 h-4 text-orange-400" />
@@ -108,7 +108,7 @@ export default function Analytics() {
               <CardContent>
                 <div className="space-y-1">
                   {data?.topQueries.map((q, i) => (
-                    <div key={i} className="flex items-center justify-between py-3 border-b border-[#2a2d35] last:border-0 group hover:bg-white/[0.01] -mx-2 px-2 rounded transition-colors">
+                    <div key={i} className="flex items-center justify-between py-3 border-b border-[#2d3344] last:border-0 group hover:bg-white/[0.01] -mx-2 px-2 rounded transition-colors">
                       <div className="flex items-center gap-3">
                         <span className="text-xs text-slate-600 font-mono w-5">{i + 1}.</span>
                         <span className="text-sm text-white font-medium">{q.query}</span>
