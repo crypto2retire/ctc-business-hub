@@ -4,10 +4,9 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { CreditCard, Users, ShoppingCart, CheckCircle2, XCircle, Loader2, Unplug } from "lucide-react";
+import { CreditCard, Users, ShoppingCart, CheckCircle2, XCircle, Loader2, Unplug, Zap } from "lucide-react";
 
 interface SquareStatus { connected: boolean; }
 interface SquareImport {
@@ -67,48 +66,60 @@ export default function Square() {
   const connected = status?.connected ?? false;
 
   const statusIcon = (s: string) => {
-    if (s === "completed") return <CheckCircle2 className="w-4 h-4 text-green-600" />;
-    if (s === "failed") return <XCircle className="w-4 h-4 text-red-600" />;
-    if (s === "running") return <Loader2 className="w-4 h-4 text-blue-600 animate-spin" />;
-    return null;
+    if (s === "completed") return <CheckCircle2 className="w-4 h-4 text-emerald-400" />;
+    if (s === "failed") return <XCircle className="w-4 h-4 text-red-400" />;
+    if (s === "running") return <Loader2 className="w-4 h-4 text-orange-400 animate-spin" />;
+    return <div className="w-4 h-4 rounded-full bg-slate-600" />;
+  };
+
+  const statusStyle: Record<string, string> = {
+    completed: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+    failed: "bg-red-500/10 text-red-400 border-red-500/20",
+    running: "bg-orange-500/10 text-orange-400 border-orange-500/20",
+    pending: "bg-slate-500/10 text-slate-400 border-slate-500/20",
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Square Integration</h1>
-        <p className="text-muted-foreground">Import customers and sales data from Square</p>
+    <div className="p-8 space-y-6">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center">
+          <CreditCard className="w-5 h-5 text-orange-400" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold text-white tracking-tight">Square Integration</h1>
+          <p className="text-slate-400 text-sm">Import customers and sales data from Square</p>
+        </div>
       </div>
 
-      <Card>
+      <Card className="border-[#2a2d35] bg-[#1e2128]">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CreditCard className="w-5 h-5" /> Connection Status
+          <CardTitle className="text-white flex items-center gap-2">
+            <Zap className="w-4 h-4 text-orange-400" /> Connection Status
           </CardTitle>
-          <CardDescription>
-            {connected ? "Your Square account is connected" : "Connect your Square account to import data"}
+          <CardDescription className="text-slate-400">
+            {connected ? "Your Square account is connected and ready" : "Connect your Square account to start importing data"}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {connected ? (
             <div className="flex items-center gap-4">
-              <Badge className="bg-green-100 text-green-800 gap-1">
-                <CheckCircle2 className="w-3 h-3" /> Connected
-              </Badge>
-              <Button variant="outline" size="sm" onClick={() => disconnectMutation.mutate()}>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <CheckCircle2 className="w-3.5 h-3.5" /> Connected
+              </span>
+              <Button variant="outline" size="sm" className="border-[#2a2d35] bg-transparent text-slate-300 hover:bg-red-500/5 hover:text-red-400 hover:border-red-500/20" onClick={() => disconnectMutation.mutate()}>
                 <Unplug className="w-4 h-4 mr-2" /> Disconnect
               </Button>
             </div>
           ) : (
             <div className="flex gap-2">
               <Input
-                placeholder="Square Access Token"
+                placeholder="Paste your Square Access Token..."
                 type="password"
                 value={accessToken}
                 onChange={(e) => setAccessToken(e.target.value)}
-                className="max-w-md"
+                className="max-w-md bg-[#151821] border-[#2a2d35] text-white placeholder:text-slate-600"
               />
-              <Button onClick={() => connectMutation.mutate(accessToken)} disabled={!accessToken || connectMutation.isPending}>
+              <Button className="bg-orange-500 hover:bg-orange-600 text-white border-0" onClick={() => connectMutation.mutate(accessToken)} disabled={!accessToken || connectMutation.isPending}>
                 Connect
               </Button>
             </div>
@@ -117,27 +128,27 @@ export default function Square() {
       </Card>
 
       {connected && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <Card className="border-[#2a2d35] bg-[#1e2128] hover:border-[#363940] transition-all duration-200">
             <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2"><Users className="w-4 h-4" /> Import Customers</CardTitle>
-              <CardDescription>Pull customer records from Square</CardDescription>
+              <CardTitle className="text-sm text-white flex items-center gap-2"><Users className="w-4 h-4 text-blue-400" /> Import Customers</CardTitle>
+              <CardDescription className="text-slate-400 text-xs">Pull customer records from your Square account</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button onClick={() => importCustomersMutation.mutate()} disabled={importCustomersMutation.isPending}>
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white border-0 shadow-lg shadow-blue-600/10" onClick={() => importCustomersMutation.mutate()} disabled={importCustomersMutation.isPending}>
                 {importCustomersMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                 Import Customers
               </Button>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-[#2a2d35] bg-[#1e2128] hover:border-[#363940] transition-all duration-200">
             <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2"><ShoppingCart className="w-4 h-4" /> Import Sales</CardTitle>
-              <CardDescription>Pull completed orders from Square</CardDescription>
+              <CardTitle className="text-sm text-white flex items-center gap-2"><ShoppingCart className="w-4 h-4 text-emerald-400" /> Import Sales</CardTitle>
+              <CardDescription className="text-slate-400 text-xs">Pull completed orders and create job records</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button onClick={() => importSalesMutation.mutate()} disabled={importSalesMutation.isPending}>
+              <Button className="bg-emerald-600 hover:bg-emerald-700 text-white border-0 shadow-lg shadow-emerald-600/10" onClick={() => importSalesMutation.mutate()} disabled={importSalesMutation.isPending}>
                 {importSalesMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                 Import Sales
               </Button>
@@ -147,29 +158,35 @@ export default function Square() {
       )}
 
       {imports.length > 0 && (
-        <Card>
-          <CardHeader><CardTitle className="text-base">Import History</CardTitle></CardHeader>
+        <Card className="border-[#2a2d35] bg-[#1e2128] overflow-hidden">
+          <CardHeader>
+            <CardTitle className="text-sm text-white">Import History</CardTitle>
+          </CardHeader>
           <CardContent className="p-0">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Records</TableHead>
-                  <TableHead>Started</TableHead>
-                  <TableHead>Completed</TableHead>
-                  <TableHead>Error</TableHead>
+                <TableRow className="border-[#2a2d35] hover:bg-transparent">
+                  <TableHead className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Type</TableHead>
+                  <TableHead className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Status</TableHead>
+                  <TableHead className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Records</TableHead>
+                  <TableHead className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Started</TableHead>
+                  <TableHead className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Completed</TableHead>
+                  <TableHead className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Error</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {imports.map((imp) => (
-                  <TableRow key={imp.id}>
-                    <TableCell className="capitalize">{imp.type}</TableCell>
-                    <TableCell><div className="flex items-center gap-1">{statusIcon(imp.status)} {imp.status}</div></TableCell>
-                    <TableCell>{imp.recordsImported} / {imp.totalRecords}</TableCell>
-                    <TableCell className="text-sm">{imp.startedAt ? new Date(imp.startedAt).toLocaleString() : "-"}</TableCell>
-                    <TableCell className="text-sm">{imp.completedAt ? new Date(imp.completedAt).toLocaleString() : "-"}</TableCell>
-                    <TableCell className="text-sm text-destructive max-w-[200px] truncate">{imp.error ?? "-"}</TableCell>
+                {imports.map((imp, i) => (
+                  <TableRow key={imp.id} className={`border-[#2a2d35] hover:bg-white/[0.02] transition-colors ${i % 2 === 1 ? "bg-white/[0.01]" : ""}`}>
+                    <TableCell className="text-white capitalize font-medium">{imp.type}</TableCell>
+                    <TableCell>
+                      <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium border ${statusStyle[imp.status] ?? ""}`}>
+                        {statusIcon(imp.status)} {imp.status}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-slate-300 font-mono text-sm">{imp.recordsImported} <span className="text-slate-600">/</span> {imp.totalRecords}</TableCell>
+                    <TableCell className="text-slate-500 text-sm">{imp.startedAt ? new Date(imp.startedAt).toLocaleString() : "-"}</TableCell>
+                    <TableCell className="text-slate-500 text-sm">{imp.completedAt ? new Date(imp.completedAt).toLocaleString() : "-"}</TableCell>
+                    <TableCell className="text-red-400 text-sm max-w-[200px] truncate">{imp.error ?? <span className="text-slate-600">-</span>}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

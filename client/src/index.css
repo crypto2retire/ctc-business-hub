@@ -4,72 +4,70 @@
 
 @layer base {
   :root {
-    --background: 220 20% 97%;
-    --foreground: 220 15% 10%;
-    --card: 0 0% 100%;
-    --card-foreground: 220 15% 10%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 15% 10%;
-    --primary: 216 85% 45%;
+    /* CTC Dark Theme - Orange Accent */
+    --background: 225 16% 7%;       /* #0f1117 */
+    --foreground: 0 0% 95%;         /* white-ish */
+    --card: 224 14% 14%;            /* #1e2128 */
+    --card-foreground: 0 0% 95%;
+    --card-border: 224 12% 20%;     /* #2a2d35 */
+    --popover: 224 14% 14%;
+    --popover-foreground: 0 0% 95%;
+    --popover-border: 224 12% 20%;
+    --primary: 25 95% 53%;          /* #f97316 orange */
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 14% 93%;
-    --secondary-foreground: 220 15% 25%;
-    --muted: 220 14% 93%;
-    --muted-foreground: 220 10% 50%;
-    --accent: 216 85% 45%;
+    --secondary: 224 14% 18%;
+    --secondary-foreground: 215 20% 75%;
+    --muted: 224 14% 18%;
+    --muted-foreground: 215 17% 63%; /* #94a3b8 */
+    --accent: 25 95% 53%;           /* orange */
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 13% 88%;
-    --input: 220 13% 88%;
-    --ring: 216 85% 45%;
-    --radius: 0.5rem;
-    --sidebar-background: 220 25% 12%;
-    --sidebar-foreground: 220 15% 85%;
-    --sidebar-primary: 216 85% 55%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 20% 20%;
-    --sidebar-accent-foreground: 220 15% 90%;
-    --sidebar-border: 220 20% 18%;
-    --sidebar-ring: 216 85% 55%;
-  }
+    --border: 224 12% 20%;          /* #2a2d35 */
+    --input: 224 12% 20%;
+    --ring: 25 95% 53%;             /* orange ring */
+    --radius: 0.625rem;
 
-  .dark {
-    --background: 220 25% 8%;
-    --foreground: 220 15% 92%;
-    --card: 220 22% 11%;
-    --card-foreground: 220 15% 92%;
-    --popover: 220 22% 11%;
-    --popover-foreground: 220 15% 92%;
-    --primary: 216 85% 55%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 220 20% 17%;
-    --secondary-foreground: 220 15% 75%;
-    --muted: 220 20% 17%;
-    --muted-foreground: 220 10% 55%;
-    --accent: 216 85% 55%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 62% 50%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 220 20% 18%;
-    --input: 220 20% 18%;
-    --ring: 216 85% 55%;
-    --sidebar-background: 220 28% 7%;
-    --sidebar-foreground: 220 15% 80%;
-    --sidebar-primary: 216 85% 55%;
+    /* Chart colors */
+    --chart-1: 25 95% 53%;          /* orange */
+    --chart-2: 142 71% 45%;         /* green */
+    --chart-3: 47 96% 53%;          /* yellow */
+    --chart-4: 199 89% 48%;         /* blue */
+    --chart-5: 280 65% 60%;         /* purple */
+
+    /* Sidebar */
+    --sidebar-background: 225 15% 12%;  /* #1a1d23 */
+    --sidebar-foreground: 215 20% 85%;
+    --sidebar-primary: 25 95% 53%;      /* orange */
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 22% 14%;
-    --sidebar-accent-foreground: 220 15% 88%;
-    --sidebar-border: 220 22% 13%;
-    --sidebar-ring: 216 85% 55%;
+    --sidebar-accent: 225 15% 18%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 224 12% 18%;
+    --sidebar-ring: 25 95% 53%;
+
+    /* Font */
+    --font-sans: 'Inter', 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
   }
 }
 
 @layer base {
   * { @apply border-border; }
   body {
-    @apply bg-background text-foreground;
-    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-sans);
+  }
+  /* Force dark scrollbar */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: hsl(225 16% 7%); }
+  ::-webkit-scrollbar-thumb { background: hsl(224 12% 25%); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: hsl(224 12% 35%); }
+}
+
+/* Smooth transitions on interactive elements */
+@layer utilities {
+  .transition-hover {
+    @apply transition-all duration-200 ease-out;
   }
 }
 
