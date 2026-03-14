@@ -7,3 +7,6 @@ startCommand = "npm run start"
 healthcheckPath = "/"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
+
+[variables]
+NODE_VERSION = "20"
