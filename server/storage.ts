@@ -1,6 +1,6 @@
 import {
   customers, jobs, scheduleSlots, communications, invoices, invoiceLineItems, squareImports,
-  settings, analyticsCache, users,
+  settings, analyticsCache, users, competitors, aiInsights,
   type Customer, type InsertCustomer,
   type Job, type InsertJob,
   type ScheduleSlot, type InsertScheduleSlot,
@@ -9,6 +9,8 @@ import {
   type InvoiceLineItem, type InsertLineItem,
   type SquareImport, type InsertSquareImport,
   type User, type InsertUser,
+  type Competitor, type InsertCompetitor,
+  type AIInsight, type InsertAIInsight,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, gte, lte, sql } from "drizzle-orm";
@@ -314,6 +316,36 @@ export class DatabaseStorage implements IStorage {
   async createUser(data: InsertUser) {
     const [u] = await db.insert(users).values(data).returning();
     return u;
+  }
+
+  // ── Competitors ─────────────────────────────────────────────────────────────
+  async getCompetitors() {
+    return db.select().from(competitors).where(eq(competitors.isActive, true));
+  }
+  async getCompetitor(id: number) {
+    const [c] = await db.select().from(competitors).where(eq(competitors.id, id));
+    return c;
+  }
+  async createCompetitor(data: InsertCompetitor) {
+    const [c] = await db.insert(competitors).values(data).returning();
+    return c;
+  }
+  async updateCompetitor(id: number, data: Partial<InsertCompetitor>) {
+    const [c] = await db.update(competitors).set(data).where(eq(competitors.id, id)).returning();
+    return c;
+  }
+  async deleteCompetitor(id: number) {
+    const result = await db.update(competitors).set({ isActive: false }).where(eq(competitors.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // ── AI Insights ─────────────────────────────────────────────────────────────
+  async getAIInsights(limit = 50) {
+    return db.select().from(aiInsights).orderBy(desc(aiInsights.generatedAt)).limit(limit);
+  }
+  async updateAIInsight(id: number, data: Partial<InsertAIInsight>) {
+    const [i] = await db.update(aiInsights).set(data as any).where(eq(aiInsights.id, id)).returning();
+    return i;
   }
 }
 

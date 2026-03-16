@@ -12,6 +12,7 @@ import Schedule from "@/pages/Schedule";
 import Invoices from "@/pages/Invoices";
 import Communications from "@/pages/Communications";
 import Analytics from "@/pages/Analytics";
+import AIInsights from "@/pages/AIInsights";
 import Square from "@/pages/Square";
 import NotFound from "@/pages/not-found";
 
@@ -39,6 +40,7 @@ function AppRouter() {
       <Route path="/invoices" component={() => <AppLayout><Invoices /></AppLayout>} />
       <Route path="/communications" component={() => <AppLayout><Communications /></AppLayout>} />
       <Route path="/analytics" component={() => <AppLayout><Analytics /></AppLayout>} />
+      <Route path="/ai-insights" component={() => <AppLayout><AIInsights /></AppLayout>} />
       <Route path="/square" component={() => <AppLayout><Square /></AppLayout>} />
       <Route component={NotFound} />
     </Switch>

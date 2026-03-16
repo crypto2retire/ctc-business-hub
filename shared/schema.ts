@@ -165,3 +165,42 @@ export const users = pgTable("users", {
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true });
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+
+// ── Competitors ──────────────────────────────────────────────────────────────
+export const competitors = pgTable("competitors", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  website: text("website"),
+  googleMapsUrl: text("google_maps_url"),
+  phone: text("phone"),
+  address: text("address"),
+  gmbRating: real("gmb_rating"),
+  gmbReviewCount: integer("gmb_review_count"),
+  gmbCategories: text("gmb_categories"), // comma-separated
+  notes: text("notes"),
+  isActive: boolean("is_active").notNull().default(true),
+  lastCheckedAt: timestamp("last_checked_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertCompetitorSchema = createInsertSchema(competitors).omit({ id: true, createdAt: true, lastCheckedAt: true });
+export type InsertCompetitor = z.infer<typeof insertCompetitorSchema>;
+export type Competitor = typeof competitors.$inferSelect;
+
+// ── AI Insights Log ──────────────────────────────────────────────────────────
+export const aiInsights = pgTable("ai_insights", {
+  id: serial("id").primaryKey(),
+  category: text("category").notNull(), // seo, ads, gmb, website, overall
+  priority: text("priority").notNull().default("medium"), // high, medium, low
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  actionItems: text("action_items"), // JSON array of steps
+  competitorContext: text("competitor_context"), // which competitor(s) prompted this
+  status: text("status").notNull().default("new"), // new, in_progress, completed, dismissed
+  generatedAt: timestamp("generated_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+});
+
+export const insertAIInsightSchema = createInsertSchema(aiInsights).omit({ id: true, generatedAt: true, completedAt: true });
+export type InsertAIInsight = z.infer<typeof insertAIInsightSchema>;
+export type AIInsight = typeof aiInsights.$inferSelect;

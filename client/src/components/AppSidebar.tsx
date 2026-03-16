@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/sidebar";
 import {
   LayoutDashboard, Users, Briefcase, Calendar, FileText,
-  MessageSquare, BarChart3, CreditCard, ExternalLink, Trash2
+  MessageSquare, BarChart3, CreditCard, ExternalLink, Trash2, Brain
 } from "lucide-react";
 
 const navItems = [
@@ -17,7 +17,8 @@ const navItems = [
   { label: "Invoices", icon: FileText, href: "/invoices", badge: "NEW" },
   { label: "Communications", icon: MessageSquare, href: "/communications" },
   { label: "Analytics", icon: BarChart3, href: "/analytics" },
-  { label: "Square", icon: CreditCard, href: "/square", badge: "NEW" },
+  { label: "AI Insights", icon: Brain, href: "/ai-insights", badge: "NEW" },
+  { label: "Square", icon: CreditCard, href: "/square" },
 ];
 
 export function AppSidebar() {

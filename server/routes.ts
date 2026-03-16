@@ -8,6 +8,10 @@ import {
   getFBPageInsights, getFBRecentPosts,
   getAnalyticsStatus,
 } from "./analytics";
+import { getGMBReviews, getGMBPerformance, getGMBPosts, getGMBQuestions, getGMBStatus } from "./gmb";
+import { getAdsCampaignOverview, getAdsKeywords, getAdsDailySpend, getAdsSearchTerms, getAdsStatus } from "./ads";
+import { generateAIInsights, getQuickHealthCheck, updateInsightStatus } from "./ai-insights";
+import { insertCompetitorSchema } from "@shared/schema";
 
 export function registerRoutes(httpServer: Server, app: Express) {
   // ── Stats ──────────────────────────────────────────────────────────────────────
@@ -442,11 +446,6 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
   // ── Analytics (Real integrations with caching) ────────────────────────────────
 
-  // Status endpoint — shows which integrations are configured
-  app.get("/api/analytics/status", async (_req, res) => {
-    res.json(getAnalyticsStatus());
-  });
-
   // Combined overview — pulls from all configured sources for the dashboard
   app.get("/api/analytics/live", async (_req, res) => {
     try {
@@ -522,5 +521,95 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
   app.get("/api/analytics/fb/posts", async (_req, res) => {
     res.json(await getFBRecentPosts());
+  });
+
+  // ── Google My Business Endpoints ────────────────────────────────────────────
+  app.get("/api/gmb/status", async (_req, res) => {
+    res.json(getGMBStatus());
+  });
+  app.get("/api/gmb/reviews", async (_req, res) => {
+    res.json(await getGMBReviews());
+  });
+  app.get("/api/gmb/performance", async (_req, res) => {
+    res.json(await getGMBPerformance());
+  });
+  app.get("/api/gmb/posts", async (_req, res) => {
+    res.json(await getGMBPosts());
+  });
+  app.get("/api/gmb/questions", async (_req, res) => {
+    res.json(await getGMBQuestions());
+  });
+
+  // ── Google Ads Endpoints ────────────────────────────────────────────────────
+  app.get("/api/ads/status", async (_req, res) => {
+    res.json(getAdsStatus());
+  });
+  app.get("/api/ads/campaigns", async (_req, res) => {
+    res.json(await getAdsCampaignOverview());
+  });
+  app.get("/api/ads/keywords", async (_req, res) => {
+    res.json(await getAdsKeywords());
+  });
+  app.get("/api/ads/daily-spend", async (_req, res) => {
+    res.json(await getAdsDailySpend());
+  });
+  app.get("/api/ads/search-terms", async (_req, res) => {
+    res.json(await getAdsSearchTerms());
+  });
+
+  // ── Competitors ─────────────────────────────────────────────────────────────
+  app.get("/api/competitors", async (_req, res) => {
+    const all = await storage.getCompetitors();
+    res.json(all);
+  });
+  app.post("/api/competitors", async (req, res) => {
+    const parsed = insertCompetitorSchema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ error: parsed.error });
+    const c = await storage.createCompetitor(parsed.data);
+    res.status(201).json(c);
+  });
+  app.patch("/api/competitors/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+    const updated = await storage.updateCompetitor(id, req.body);
+    if (!updated) return res.status(404).json({ error: "Not found" });
+    res.json(updated);
+  });
+  app.delete("/api/competitors/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+    const ok = await storage.deleteCompetitor(id);
+    if (!ok) return res.status(404).json({ error: "Not found" });
+    res.json({ ok: true });
+  });
+
+  // ── AI Insights ─────────────────────────────────────────────────────────────
+  app.get("/api/ai/insights", async (req, res) => {
+    const forceRefresh = req.query.refresh === "true";
+    res.json(await generateAIInsights(forceRefresh));
+  });
+  app.get("/api/ai/health-check", async (_req, res) => {
+    res.json(await getQuickHealthCheck());
+  });
+  app.get("/api/ai/insights/history", async (_req, res) => {
+    const history = await storage.getAIInsights();
+    res.json(history);
+  });
+  app.patch("/api/ai/insights/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+    const { status } = req.body;
+    const updated = await updateInsightStatus(id, status);
+    res.json(updated);
+  });
+
+  // ── Extended Analytics Status ───────────────────────────────────────────────
+  app.get("/api/analytics/status", async (_req, res) => {
+    res.json({
+      ...getAnalyticsStatus(),
+      gmb: getGMBStatus(),
+      ads: getAdsStatus(),
+      ai: {
+        configured: !!process.env.ANTHROPIC_API_KEY,
+        apiKey: process.env.ANTHROPIC_API_KEY ? "set" : "missing",
+      },
+    });
   });
 }
