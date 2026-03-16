@@ -80,15 +80,17 @@ export default function Invoices() {
     const form = new FormData(e.currentTarget);
     const today = new Date().toISOString().split("T")[0];
     const due = new Date(Date.now() + 30 * 86400000).toISOString().split("T")[0];
+    const totalAmount = parseFloat(form.get("total") as string) || 0;
     createMutation.mutate({
       invoiceNumber: `INV-${Date.now()}`,
       customerId: parseInt(form.get("customerId") as string),
       status: "draft",
       issueDate: today,
       dueDate: due,
-      total: parseFloat(form.get("total") as string) || 0,
-      subtotal: parseFloat(form.get("total") as string) || 0,
-    });
+      total: totalAmount,
+      subtotal: totalAmount,
+      balanceDue: totalAmount,
+    } as any);
   }
 
   return (

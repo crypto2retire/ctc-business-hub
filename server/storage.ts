@@ -1,5 +1,6 @@
 import {
   customers, jobs, scheduleSlots, communications, invoices, invoiceLineItems, squareImports,
+  settings, analyticsCache, users,
   type Customer, type InsertCustomer,
   type Job, type InsertJob,
   type ScheduleSlot, type InsertScheduleSlot,
@@ -7,9 +8,10 @@ import {
   type Invoice, type InsertInvoice,
   type InvoiceLineItem, type InsertLineItem,
   type SquareImport, type InsertSquareImport,
+  type User, type InsertUser,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, gte, sql } from "drizzle-orm";
+import { eq, and, desc, gte, lte, sql } from "drizzle-orm";
 
 export interface IStorage {
   // Customers
@@ -60,6 +62,19 @@ export interface IStorage {
   updateSquareImport(id: number, data: Partial<InsertSquareImport>): Promise<SquareImport | undefined>;
   getSquareSettings(): Promise<{ accessToken: string; connected: boolean } | null>;
   setSquareSettings(accessToken: string): Promise<void>;
+
+  // Settings (key-value)
+  getSetting(key: string): Promise<string | null>;
+  setSetting(key: string, value: string): Promise<void>;
+
+  // Analytics Cache
+  getCachedAnalytics(source: string, endpoint: string): Promise<any | null>;
+  setCachedAnalytics(source: string, endpoint: string, data: any, ttlMinutes: number): Promise<void>;
+
+  // Users
+  getUserByEmail(email: string): Promise<User | undefined>;
+  getUserById(id: number): Promise<User | undefined>;
+  createUser(data: InsertUser): Promise<User>;
 
   // Stats
   getStats(): Promise<{
@@ -216,14 +231,14 @@ export class DatabaseStorage implements IStorage {
     return si;
   }
   async getSquareSettings() {
-    const token = process.env.SQUARE_ACCESS_TOKEN;
-    if (token) return { accessToken: token, connected: true };
+    // Check DB settings table first, then fall back to env var
+    const dbToken = await this.getSetting("square_access_token");
+    const token = (dbToken && dbToken.length > 0) ? dbToken : process.env.SQUARE_ACCESS_TOKEN;
+    if (token && token.length > 0) return { accessToken: token, connected: true };
     return null;
   }
   async setSquareSettings(accessToken: string) {
-    // In production, token is managed via env var; this is a no-op
-    // For dev/test: could store in a settings table, but we rely on env var
-    process.env.SQUARE_ACCESS_TOKEN = accessToken;
+    await this.setSetting("square_access_token", accessToken);
   }
 
   // ── Stats ───────────────────────────────────────────────────────────────────
@@ -247,6 +262,58 @@ export class DatabaseStorage implements IStorage {
     const invoicesPaid = allInvoices.filter(i => i.status === "paid").length;
 
     return { activeJobs, completedThisMonth, revenueThisMonth, pendingEstimates, invoicesDue, invoicesPaid };
+  }
+
+  // ── Settings ─────────────────────────────────────────────────────────────────
+  async getSetting(key: string) {
+    const [row] = await db.select().from(settings).where(eq(settings.key, key));
+    return row?.value ?? null;
+  }
+  async setSetting(key: string, value: string) {
+    const existing = await this.getSetting(key);
+    if (existing !== null) {
+      await db.update(settings).set({ value, updatedAt: new Date() }).where(eq(settings.key, key));
+    } else {
+      await db.insert(settings).values({ key, value });
+    }
+  }
+
+  // ── Analytics Cache ──────────────────────────────────────────────────────────
+  async getCachedAnalytics(source: string, endpoint: string) {
+    const now = new Date();
+    const [row] = await db.select().from(analyticsCache)
+      .where(and(
+        eq(analyticsCache.source, source),
+        eq(analyticsCache.endpoint, endpoint),
+        gte(analyticsCache.expiresAt, now),
+      ))
+      .orderBy(desc(analyticsCache.fetchedAt))
+      .limit(1);
+    return row?.data ?? null;
+  }
+  async setCachedAnalytics(source: string, endpoint: string, data: any, ttlMinutes: number) {
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + ttlMinutes * 60 * 1000);
+    // Delete old entries for this source+endpoint
+    await db.delete(analyticsCache).where(and(
+      eq(analyticsCache.source, source),
+      eq(analyticsCache.endpoint, endpoint),
+    ));
+    await db.insert(analyticsCache).values({ source, endpoint, data, fetchedAt: now, expiresAt });
+  }
+
+  // ── Users ─────────────────────────────────────────────────────────────────────
+  async getUserByEmail(email: string) {
+    const [u] = await db.select().from(users).where(eq(users.email, email));
+    return u;
+  }
+  async getUserById(id: number) {
+    const [u] = await db.select().from(users).where(eq(users.id, id));
+    return u;
+  }
+  async createUser(data: InsertUser) {
+    const [u] = await db.insert(users).values(data).returning();
+    return u;
   }
 }
 

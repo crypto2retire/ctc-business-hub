@@ -1,4 +1,4 @@
-import { pgTable, text, integer, real, boolean, serial, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, integer, real, boolean, serial, timestamp, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -129,3 +129,39 @@ export const squareImports = pgTable("square_imports", {
 export const insertSquareImportSchema = createInsertSchema(squareImports).omit({ id: true, startedAt: true, completedAt: true });
 export type InsertSquareImport = z.infer<typeof insertSquareImportSchema>;
 export type SquareImport = typeof squareImports.$inferSelect;
+
+// ── Settings (Key-Value Store) ────────────────────────────────────────────────
+export const settings = pgTable("settings", {
+  id: serial("id").primaryKey(),
+  key: text("key").notNull().unique(),
+  value: text("value").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type Setting = typeof settings.$inferSelect;
+
+// ── Analytics Cache ───────────────────────────────────────────────────────────
+export const analyticsCache = pgTable("analytics_cache", {
+  id: serial("id").primaryKey(),
+  source: text("source").notNull(),         // ga, gsc, ads, fb
+  endpoint: text("endpoint").notNull(),     // overview, queries, etc.
+  data: jsonb("data"),                      // cached JSON response
+  fetchedAt: timestamp("fetched_at").defaultNow(),
+  expiresAt: timestamp("expires_at").notNull(),
+});
+
+export type AnalyticsCacheEntry = typeof analyticsCache.$inferSelect;
+
+// ── Users ─────────────────────────────────────────────────────────────────────
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  name: text("name").notNull(),
+  role: text("role").notNull().default("admin"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true });
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type User = typeof users.$inferSelect;

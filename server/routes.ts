@@ -2,6 +2,12 @@ import type { Express } from "express";
 import type { Server } from "http";
 import { storage } from "./storage";
 import { insertCustomerSchema, insertJobSchema, insertCommunicationSchema, insertInvoiceSchema, insertLineItemSchema } from "@shared/schema";
+import {
+  getGAOverview, getGADailySessions, getGATopPages, getGATrafficSources,
+  getGSCPerformance, getGSCQueries, getGSCPages,
+  getFBPageInsights, getFBRecentPosts,
+  getAnalyticsStatus,
+} from "./analytics";
 
 export function registerRoutes(httpServer: Server, app: Express) {
   // ── Stats ──────────────────────────────────────────────────────────────────────
@@ -167,8 +173,7 @@ export function registerRoutes(httpServer: Server, app: Express) {
       balanceDue: 0,
       paymentMethod: paymentMethod || "cash",
       squarePaymentId: squarePaymentId || null,
-      paidAt: new Date().toISOString() as any,
-    });
+    } as any);
     if (!updated) return res.status(404).json({ error: "Not found" });
     res.json(updated);
   });
@@ -216,8 +221,8 @@ export function registerRoutes(httpServer: Server, app: Express) {
   });
 
   app.post("/api/square/disconnect", async (_req, res) => {
-    // In real app, revoke token. Here just clear.
-    (storage as any).squareSettings = null;
+    // Clear the stored token from settings table
+    await storage.setSetting("square_access_token", "");
     res.json({ connected: false });
   });
 
@@ -435,19 +440,87 @@ export function registerRoutes(httpServer: Server, app: Express) {
     })();
   });
 
-  // Analytics (simulated)
+  // ── Analytics (Real integrations with caching) ────────────────────────────────
+
+  // Status endpoint — shows which integrations are configured
+  app.get("/api/analytics/status", async (_req, res) => {
+    res.json(getAnalyticsStatus());
+  });
+
+  // Combined overview — pulls from all configured sources for the dashboard
   app.get("/api/analytics/live", async (_req, res) => {
-    res.json({
-      sessions: 1247,
-      clicks: 89,
-      avgSession: "2m 14s",
-      dailySessions: [42, 38, 51, 47, 63, 55, 71],
-      topQueries: [
-        { query: "junk removal oshkosh", clicks: 34, impressions: 421 },
-        { query: "garage cleanout wi", clicks: 22, impressions: 287 },
-        { query: "estate cleanout service", clicks: 18, impressions: 193 },
-        { query: "cheap junk removal", clicks: 15, impressions: 312 },
-      ],
-    });
+    try {
+      const [ga, gsc] = await Promise.all([
+        getGAOverview(),
+        getGSCPerformance(),
+      ]);
+
+      // Also get daily sessions and queries for the existing frontend
+      const [daily, queries] = await Promise.all([
+        getGADailySessions(),
+        getGSCQueries(),
+      ]);
+
+      // Format to match the existing frontend interface
+      const gaData = ga as any;
+      const gscData = gsc as any;
+      const dailyData = daily as any;
+      const queryData = queries as any;
+
+      const avgDuration = gaData.avgSessionDuration ?? 0;
+      const mins = Math.floor(avgDuration / 60);
+      const secs = Math.floor(avgDuration % 60);
+
+      res.json({
+        sessions: gaData.sessions ?? 0,
+        clicks: gscData.clicks ?? 0,
+        avgSession: avgDuration > 0 ? `${mins}m ${secs}s` : "-",
+        dailySessions: dailyData.days?.map((d: any) => d.sessions) ?? [],
+        topQueries: queryData.queries?.slice(0, 10) ?? [],
+        // Extended data for future frontend tabs
+        ga: gaData,
+        gsc: gscData,
+      });
+    } catch (e: any) {
+      console.error("Analytics live error:", e.message);
+      res.json({
+        sessions: 0, clicks: 0, avgSession: "-",
+        dailySessions: [], topQueries: [],
+        error: e.message,
+      });
+    }
+  });
+
+  // Google Analytics endpoints
+  app.get("/api/analytics/ga/overview", async (_req, res) => {
+    res.json(await getGAOverview());
+  });
+  app.get("/api/analytics/ga/daily-sessions", async (_req, res) => {
+    res.json(await getGADailySessions());
+  });
+  app.get("/api/analytics/ga/top-pages", async (_req, res) => {
+    res.json(await getGATopPages());
+  });
+  app.get("/api/analytics/ga/traffic-sources", async (_req, res) => {
+    res.json(await getGATrafficSources());
+  });
+
+  // Google Search Console endpoints
+  app.get("/api/analytics/gsc/performance", async (_req, res) => {
+    res.json(await getGSCPerformance());
+  });
+  app.get("/api/analytics/gsc/queries", async (_req, res) => {
+    res.json(await getGSCQueries());
+  });
+  app.get("/api/analytics/gsc/pages", async (_req, res) => {
+    res.json(await getGSCPages());
+  });
+
+  // Facebook endpoints
+  app.get("/api/analytics/fb/page-insights", async (_req, res) => {
+    res.json(await getFBPageInsights());
+  });
+  app.get("/api/analytics/fb/posts", async (_req, res) => {
+    res.json(await getFBRecentPosts());
   });
 }
