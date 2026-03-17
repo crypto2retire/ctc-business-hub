@@ -11,12 +11,123 @@ import { getAdsCampaignOverview, getAdsKeywords, getAdsSearchTerms } from "./ads
 const CACHE_TTL_MINUTES = 60; // AI insights refresh hourly
 
 // ═══════════════════════════════════════════════════════════════════════════════
+// Revenue Snapshot from Square/Internal Data
+// ═══════════════════════════════════════════════════════════════════════════════
+
+async function getRevenueSnapshot() {
+  try {
+    const { jobs, invoices, customers } = require("@shared/schema");
+    const { db } = require("./db");
+    const { eq, gte, and, sql } = require("drizzle-orm");
+
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+
+    // Get all jobs and invoices for analysis
+    const allJobs = await db.select().from(jobs);
+    const allInvoices = await db.select().from(invoices);
+    const allCustomers = await db.select().from(customers);
+
+    // ── Revenue this month vs last month ──
+    const revenueThisMonth = allInvoices
+      .filter((i: any) => i.status === "paid" && i.paidAt && new Date(i.paidAt) >= monthStart)
+      .reduce((sum: number, i: any) => sum + (i.total ?? 0), 0);
+
+    const revenueLastMonth = allInvoices
+      .filter((i: any) => {
+        if (i.status !== "paid" || !i.paidAt) return false;
+        const d = new Date(i.paidAt);
+        return d >= lastMonthStart && d <= lastMonthEnd;
+      })
+      .reduce((sum: number, i: any) => sum + (i.total ?? 0), 0);
+
+    // ── Job metrics (last 30 days) ──
+    const recentJobs = allJobs.filter((j: any) => j.createdAt && new Date(j.createdAt) >= thirtyDaysAgo);
+    const completedJobs = recentJobs.filter((j: any) => j.status === "completed");
+    const completedWithPrice = completedJobs.filter((j: any) => j.finalPrice && j.finalPrice > 0);
+
+    const avgJobValue = completedWithPrice.length > 0
+      ? completedWithPrice.reduce((sum: number, j: any) => sum + j.finalPrice, 0) / completedWithPrice.length
+      : 0;
+
+    // ── Revenue by service type ──
+    const revenueByService: Record<string, { count: number; revenue: number }> = {};
+    for (const j of completedWithPrice) {
+      const svc = j.serviceType || "Other";
+      if (!revenueByService[svc]) revenueByService[svc] = { count: 0, revenue: 0 };
+      revenueByService[svc].count++;
+      revenueByService[svc].revenue += j.finalPrice;
+    }
+
+    // ── Revenue by lead source ──
+    const revenueBySource: Record<string, { count: number; revenue: number }> = {};
+    for (const j of completedWithPrice) {
+      const src = j.leadSource || "Unknown";
+      if (!revenueBySource[src]) revenueBySource[src] = { count: 0, revenue: 0 };
+      revenueBySource[src].count++;
+      revenueBySource[src].revenue += j.finalPrice;
+    }
+
+    // ── Pipeline / conversion funnel ──
+    const leads = allJobs.filter((j: any) => j.status === "lead").length;
+    const scheduled = allJobs.filter((j: any) => j.status === "scheduled").length;
+    const inProgress = allJobs.filter((j: any) => j.status === "in_progress").length;
+    const completedAll = allJobs.filter((j: any) => j.status === "completed").length;
+    const cancelled = allJobs.filter((j: any) => j.status === "cancelled").length;
+
+    // ── 90-day revenue trend (monthly buckets) ──
+    const monthlyRevenue: Record<string, number> = {};
+    for (const inv of allInvoices) {
+      if (inv.status !== "paid" || !inv.paidAt) continue;
+      const d = new Date(inv.paidAt);
+      if (d < ninetyDaysAgo) continue;
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      monthlyRevenue[key] = (monthlyRevenue[key] ?? 0) + (inv.total ?? 0);
+    }
+
+    // ── Outstanding invoices ──
+    const outstandingInvoices = allInvoices
+      .filter((i: any) => i.status === "sent" || i.status === "overdue")
+      .reduce((sum: number, i: any) => sum + (i.balanceDue ?? 0), 0);
+
+    return {
+      available: true,
+      revenueThisMonth: Math.round(revenueThisMonth * 100) / 100,
+      revenueLastMonth: Math.round(revenueLastMonth * 100) / 100,
+      revenueChange: revenueLastMonth > 0
+        ? Math.round(((revenueThisMonth - revenueLastMonth) / revenueLastMonth) * 100)
+        : null,
+      last30Days: {
+        totalJobs: recentJobs.length,
+        completedJobs: completedJobs.length,
+        avgJobValue: Math.round(avgJobValue * 100) / 100,
+        totalRevenue: Math.round(completedWithPrice.reduce((s: number, j: any) => s + j.finalPrice, 0) * 100) / 100,
+      },
+      revenueByService,
+      revenueByLeadSource: revenueBySource,
+      pipeline: { leads, scheduled, inProgress, completed: completedAll, cancelled },
+      monthlyRevenueTrend: monthlyRevenue,
+      outstandingBalance: Math.round(outstandingInvoices * 100) / 100,
+      totalCustomers: allCustomers.length,
+      squareCustomers: allCustomers.filter((c: any) => c.squareCustomerId).length,
+    };
+  } catch (e: any) {
+    console.error("Revenue snapshot error:", e.message);
+    return { available: false, error: e.message };
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // Gather All Data for AI Analysis
 // ═══════════════════════════════════════════════════════════════════════════════
 
 async function gatherAnalyticsSnapshot() {
   // Run all data fetches in parallel — they each have their own caching
-  const [ga, topPages, traffic, gsc, queries, gmb, gmbPerf, ads, keywords, searchTerms] =
+  const [ga, topPages, traffic, gsc, queries, gmb, gmbPerf, ads, keywords, searchTerms, revenue] =
     await Promise.allSettled([
       getGAOverview(),
       getGATopPages(),
@@ -28,6 +139,7 @@ async function gatherAnalyticsSnapshot() {
       getAdsCampaignOverview(),
       getAdsKeywords(),
       getAdsSearchTerms(),
+      getRevenueSnapshot(),
     ]);
 
   const val = (p: PromiseSettledResult<any>) => p.status === "fulfilled" ? p.value : null;
@@ -51,6 +163,7 @@ async function gatherAnalyticsSnapshot() {
       keywords: val(keywords),
       searchTerms: val(searchTerms),
     },
+    revenue: val(revenue),
   };
 }
 
@@ -126,7 +239,7 @@ Provide recommendations in EXACTLY this JSON format (no markdown, no code fences
   "overallScore": <number 1-100 representing overall digital presence health>,
   "insights": [
     {
-      "category": "<seo|ads|gmb|website|content>",
+      "category": "<seo|ads|gmb|website|content|revenue>",
       "priority": "<high|medium|low>",
       "title": "<short action-oriented title>",
       "description": "<2-3 sentence explanation with specific data points>",
@@ -135,6 +248,13 @@ Provide recommendations in EXACTLY this JSON format (no markdown, no code fences
       "estimatedImpact": "<what improvement to expect>"
     }
   ],
+  "revenueAnalysis": {
+    "adSpendROI": "<calculated return on ad spend if data available>",
+    "costPerAcquisition": "<true cost to acquire a paying customer>",
+    "highestValueService": "<which service type generates most revenue>",
+    "bestLeadSource": "<which lead source brings highest-value jobs>",
+    "revenueRecommendations": ["<specific actions to increase revenue>"]
+  },
   "competitorComparison": {
     "strongerAreas": ["<area where CTC leads>"],
     "weakerAreas": ["<area where competitors lead>"],
@@ -150,6 +270,10 @@ Focus on:
 4. Content gaps — what competitors cover that we don't
 5. Conversion optimization — website pages with high traffic but low engagement
 6. Local ranking opportunities — specific neighborhoods or service types to target
+7. Revenue ROI — compare ad spend to actual job revenue, calculate true cost-per-acquisition from Square data
+8. Service mix optimization — which service types generate the most revenue per job, and which are undermarketed
+9. Lead source performance — which lead sources (Google, Square, referral, etc.) bring the highest-value jobs
+10. Pipeline health — lead-to-completed conversion rate, outstanding invoices, revenue trends
 
 Be SPECIFIC. Use actual numbers from the data. Reference specific competitors by name. Give step-by-step action items, not vague advice.`;
 
@@ -267,11 +391,12 @@ export async function getQuickHealthCheck() {
   const cached = await storage.getCachedAnalytics("ai", "health-check");
   if (cached) return cached;
 
-  const [ga, gsc, gmb, ads] = await Promise.allSettled([
+  const [ga, gsc, gmb, ads, rev] = await Promise.allSettled([
     getGAOverview(),
     getGSCPerformance(),
     getGMBReviews(),
     getAdsCampaignOverview(),
+    getRevenueSnapshot(),
   ]);
 
   const val = (p: PromiseSettledResult<any>) => p.status === "fulfilled" ? p.value : null;
@@ -279,6 +404,7 @@ export async function getQuickHealthCheck() {
   const gscData = val(gsc);
   const gmbData = val(gmb);
   const adsData = val(ads);
+  const revData = val(rev);
 
   const checks = [];
 
@@ -340,6 +466,36 @@ export async function getQuickHealthCheck() {
     }
   } else {
     checks.push({ area: "Ads", status: "missing", message: "Google Ads not connected" });
+  }
+
+  // Revenue checks
+  if (revData?.available) {
+    checks.push({
+      area: "Revenue",
+      status: revData.revenueThisMonth > 0 ? "good" : "warning",
+      message: `$${revData.revenueThisMonth.toLocaleString()} this month${revData.revenueChange !== null ? ` (${revData.revenueChange > 0 ? "+" : ""}${revData.revenueChange}% vs last month)` : ""}`,
+    });
+    if (revData.last30Days.avgJobValue > 0) {
+      checks.push({
+        area: "Avg Job Value",
+        status: "info",
+        message: `$${revData.last30Days.avgJobValue.toFixed(0)} avg per job (${revData.last30Days.completedJobs} completed last 30 days)`,
+      });
+    }
+    if (revData.outstandingBalance > 0) {
+      checks.push({
+        area: "Outstanding",
+        status: revData.outstandingBalance > 1000 ? "warning" : "info",
+        message: `$${revData.outstandingBalance.toLocaleString()} in unpaid invoices`,
+      });
+    }
+    if (revData.pipeline.leads > 5) {
+      checks.push({
+        area: "Pipeline",
+        status: "warning",
+        message: `${revData.pipeline.leads} unconverted leads — follow up to close`,
+      });
+    }
   }
 
   const result = { checks, timestamp: new Date().toISOString() };
