@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Search, Trash2, Pencil, Users } from "lucide-react";
+import { Plus, Search, Trash2, Pencil, Users, ChevronDown, ChevronRight, Briefcase, FileText } from "lucide-react";
 
 interface Customer {
   id: number;
@@ -25,6 +25,31 @@ interface Customer {
   squareCustomerId: string | null;
 }
 
+interface Job {
+  id: number;
+  customerId: number;
+  title: string;
+  serviceType: string | null;
+  status: string;
+  finalPrice: number | null;
+  estimateLow: number | null;
+  estimateHigh: number | null;
+  scheduledDate: string | null;
+  leadSource: string | null;
+  createdAt: string | null;
+}
+
+interface Invoice {
+  id: number;
+  invoiceNumber: string;
+  customerId: number;
+  status: string;
+  total: number;
+  balanceDue: number;
+  issueDate: string;
+  paymentMethod: string | null;
+}
+
 const sourceColors: Record<string, string> = {
   "Google": "bg-blue-500/10 text-blue-400 border-blue-500/20",
   "Referral": "bg-green-500/10 text-green-400 border-green-500/20",
@@ -34,15 +59,28 @@ const sourceColors: Record<string, string> = {
   "Website": "bg-orange-500/10 text-orange-400 border-orange-500/20",
 };
 
+const statusStyles: Record<string, string> = {
+  lead: "bg-slate-500/10 text-slate-400 border-slate-500/20",
+  scheduled: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+  in_progress: "bg-orange-500/10 text-orange-400 border-orange-500/20",
+  completed: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+  cancelled: "bg-red-500/10 text-red-400 border-red-500/20",
+  draft: "bg-slate-500/10 text-slate-400 border-slate-500/20",
+  sent: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+  paid: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+  overdue: "bg-red-500/10 text-red-400 border-red-500/20",
+};
+
 export default function Customers() {
   const { toast } = useToast();
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
+  const [expandedCustomer, setExpandedCustomer] = useState<number | null>(null);
 
-  const { data: customers = [], isLoading } = useQuery<Customer[]>({
-    queryKey: ["/api/customers"],
-  });
+  const { data: customers = [], isLoading } = useQuery<Customer[]>({ queryKey: ["/api/customers"] });
+  const { data: allJobs = [] } = useQuery<Job[]>({ queryKey: ["/api/jobs"] });
+  const { data: allInvoices = [] } = useQuery<Invoice[]>({ queryKey: ["/api/invoices"] });
 
   const createMutation = useMutation({
     mutationFn: (data: Partial<Customer>) => apiRequest("POST", "/api/customers", data),
@@ -77,6 +115,14 @@ export default function Customers() {
     c.phone.includes(search) ||
     (c.email?.toLowerCase().includes(search.toLowerCase()) ?? false)
   );
+
+  const getCustomerJobs = (customerId: number) => allJobs.filter(j => j.customerId === customerId);
+  const getCustomerInvoices = (customerId: number) => allInvoices.filter(i => i.customerId === customerId);
+  const getCustomerRevenue = (customerId: number) => {
+    return allInvoices
+      .filter(i => i.customerId === customerId && i.status === "paid")
+      .reduce((sum, i) => sum + (i.total ?? 0), 0);
+  };
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -153,44 +199,154 @@ export default function Customers() {
           <Table>
             <TableHeader>
               <TableRow className="border-[#2d3344] hover:bg-transparent">
+                <TableHead className="text-slate-400 text-xs uppercase tracking-wider font-semibold w-[30px]"></TableHead>
                 <TableHead className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Name</TableHead>
                 <TableHead className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Phone</TableHead>
                 <TableHead className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Email</TableHead>
                 <TableHead className="text-slate-400 text-xs uppercase tracking-wider font-semibold">City</TableHead>
                 <TableHead className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Source</TableHead>
+                <TableHead className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Jobs</TableHead>
+                <TableHead className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Revenue</TableHead>
                 <TableHead className="text-slate-400 text-xs uppercase tracking-wider font-semibold w-[100px]">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                <TableRow className="border-[#2d3344]"><TableCell colSpan={6} className="text-center py-12 text-slate-500">Loading...</TableCell></TableRow>
+                <TableRow className="border-[#2d3344]"><TableCell colSpan={9} className="text-center py-12 text-slate-500">Loading...</TableCell></TableRow>
               ) : filtered.length === 0 ? (
-                <TableRow className="border-[#2d3344]"><TableCell colSpan={6} className="text-center py-12 text-slate-500">No customers found</TableCell></TableRow>
-              ) : filtered.map((c, i) => (
-                <TableRow key={c.id} className={`border-[#2d3344] hover:bg-white/[0.02] transition-colors ${i % 2 === 1 ? "bg-white/[0.01]" : ""}`}>
-                  <TableCell className="font-medium text-white">{c.name}</TableCell>
-                  <TableCell className="text-slate-300">{c.phone}</TableCell>
-                  <TableCell className="text-slate-300">{c.email ?? <span className="text-slate-600">-</span>}</TableCell>
-                  <TableCell className="text-slate-300">{c.city ?? <span className="text-slate-600">-</span>}</TableCell>
-                  <TableCell>
-                    {c.source ? (
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border ${sourceColors[c.source] ?? "bg-slate-500/10 text-slate-400 border-slate-500/20"}`}>
-                        {c.source}
-                      </span>
-                    ) : <span className="text-slate-600">-</span>}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-white hover:bg-white/5" onClick={() => { setEditingCustomer(c); setDialogOpen(true); }}>
-                        <Pencil className="w-3.5 h-3.5" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-red-400 hover:bg-red-500/5" onClick={() => deleteMutation.mutate(c.id)}>
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+                <TableRow className="border-[#2d3344]"><TableCell colSpan={9} className="text-center py-12 text-slate-500">No customers found</TableCell></TableRow>
+              ) : filtered.map((c, i) => {
+                const custJobs = getCustomerJobs(c.id);
+                const custInvoices = getCustomerInvoices(c.id);
+                const custRevenue = getCustomerRevenue(c.id);
+                const isExpanded = expandedCustomer === c.id;
+
+                return (
+                  <>
+                    <TableRow key={c.id} className={`border-[#2d3344] hover:bg-white/[0.02] transition-colors cursor-pointer ${i % 2 === 1 ? "bg-white/[0.01]" : ""}`} onClick={() => setExpandedCustomer(isExpanded ? null : c.id)}>
+                      <TableCell className="px-2">
+                        {(custJobs.length > 0 || custInvoices.length > 0) && (
+                          isExpanded ? <ChevronDown className="w-4 h-4 text-slate-500" /> : <ChevronRight className="w-4 h-4 text-slate-500" />
+                        )}
+                      </TableCell>
+                      <TableCell className="font-medium text-white">{c.name}</TableCell>
+                      <TableCell className="text-slate-300">{c.phone}</TableCell>
+                      <TableCell className="text-slate-300">{c.email ?? <span className="text-slate-600">-</span>}</TableCell>
+                      <TableCell className="text-slate-300">{c.city ?? <span className="text-slate-600">-</span>}</TableCell>
+                      <TableCell>
+                        {c.source ? (
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border ${sourceColors[c.source] ?? "bg-slate-500/10 text-slate-400 border-slate-500/20"}`}>
+                            {c.source}
+                          </span>
+                        ) : <span className="text-slate-600">-</span>}
+                      </TableCell>
+                      <TableCell className="text-slate-300">{custJobs.length > 0 ? custJobs.length : <span className="text-slate-600">0</span>}</TableCell>
+                      <TableCell className="text-white font-medium">{custRevenue > 0 ? `$${custRevenue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : <span className="text-slate-600">$0</span>}</TableCell>
+                      <TableCell>
+                        <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-white hover:bg-white/5" onClick={() => { setEditingCustomer(c); setDialogOpen(true); }}>
+                            <Pencil className="w-3.5 h-3.5" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-red-400 hover:bg-red-500/5" onClick={() => deleteMutation.mutate(c.id)}>
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+
+                    {/* Expanded customer history */}
+                    {isExpanded && (custJobs.length > 0 || custInvoices.length > 0) && (
+                      <TableRow key={`${c.id}-history`} className="border-[#2d3344] bg-[#161b28]">
+                        <TableCell colSpan={9} className="p-4">
+                          <div className="space-y-4">
+                            {/* Jobs section */}
+                            {custJobs.length > 0 && (
+                              <div>
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Briefcase className="w-4 h-4 text-orange-400" />
+                                  <span className="text-sm font-semibold text-white">Jobs ({custJobs.length})</span>
+                                </div>
+                                <div className="rounded-lg border border-[#2d3344] overflow-hidden">
+                                  <table className="w-full text-sm">
+                                    <thead>
+                                      <tr className="bg-[#0f1923]">
+                                        <th className="text-left px-3 py-2 text-slate-500 text-xs uppercase font-semibold">Title</th>
+                                        <th className="text-left px-3 py-2 text-slate-500 text-xs uppercase font-semibold">Service</th>
+                                        <th className="text-left px-3 py-2 text-slate-500 text-xs uppercase font-semibold">Status</th>
+                                        <th className="text-left px-3 py-2 text-slate-500 text-xs uppercase font-semibold">Date</th>
+                                        <th className="text-left px-3 py-2 text-slate-500 text-xs uppercase font-semibold">Price</th>
+                                        <th className="text-left px-3 py-2 text-slate-500 text-xs uppercase font-semibold">Source</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {custJobs.map((j) => (
+                                        <tr key={j.id} className="border-t border-[#2d3344]">
+                                          <td className="px-3 py-2 text-white">{j.title}</td>
+                                          <td className="px-3 py-2 text-slate-400">{j.serviceType ?? "-"}</td>
+                                          <td className="px-3 py-2">
+                                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border ${statusStyles[j.status] ?? ""}`}>
+                                              {j.status}
+                                            </span>
+                                          </td>
+                                          <td className="px-3 py-2 text-slate-400">{j.scheduledDate ?? "-"}</td>
+                                          <td className="px-3 py-2 text-white font-medium">
+                                            {j.finalPrice ? `$${j.finalPrice.toLocaleString()}` : j.estimateLow ? `$${j.estimateLow}-$${j.estimateHigh}` : "-"}
+                                          </td>
+                                          <td className="px-3 py-2 text-slate-400">{j.leadSource ?? "-"}</td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Invoices section */}
+                            {custInvoices.length > 0 && (
+                              <div>
+                                <div className="flex items-center gap-2 mb-2">
+                                  <FileText className="w-4 h-4 text-teal-400" />
+                                  <span className="text-sm font-semibold text-white">Invoices ({custInvoices.length})</span>
+                                </div>
+                                <div className="rounded-lg border border-[#2d3344] overflow-hidden">
+                                  <table className="w-full text-sm">
+                                    <thead>
+                                      <tr className="bg-[#0f1923]">
+                                        <th className="text-left px-3 py-2 text-slate-500 text-xs uppercase font-semibold">Invoice #</th>
+                                        <th className="text-left px-3 py-2 text-slate-500 text-xs uppercase font-semibold">Status</th>
+                                        <th className="text-left px-3 py-2 text-slate-500 text-xs uppercase font-semibold">Date</th>
+                                        <th className="text-left px-3 py-2 text-slate-500 text-xs uppercase font-semibold">Total</th>
+                                        <th className="text-left px-3 py-2 text-slate-500 text-xs uppercase font-semibold">Balance</th>
+                                        <th className="text-left px-3 py-2 text-slate-500 text-xs uppercase font-semibold">Payment</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {custInvoices.map((inv) => (
+                                        <tr key={inv.id} className="border-t border-[#2d3344]">
+                                          <td className="px-3 py-2 text-white font-mono text-xs">{inv.invoiceNumber}</td>
+                                          <td className="px-3 py-2">
+                                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border ${statusStyles[inv.status] ?? ""}`}>
+                                              {inv.status}
+                                            </span>
+                                          </td>
+                                          <td className="px-3 py-2 text-slate-400">{inv.issueDate}</td>
+                                          <td className="px-3 py-2 text-white font-medium">${inv.total.toFixed(2)}</td>
+                                          <td className={`px-3 py-2 font-medium ${inv.balanceDue > 0 ? "text-amber-400" : "text-emerald-400"}`}>${inv.balanceDue.toFixed(2)}</td>
+                                          <td className="px-3 py-2 text-slate-400">{inv.paymentMethod ?? "-"}</td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </>
+                );
+              })}
             </TableBody>
           </Table>
         </CardContent>

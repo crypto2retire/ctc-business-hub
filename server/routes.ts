@@ -404,7 +404,12 @@ export function registerRoutes(httpServer: Server, app: Express) {
 
             const createdDate = order.created_at ? order.created_at.split("T")[0] : null;
 
-            await storage.createJob({
+            // Check if this order was already imported (by estimateRefId)
+            const existingJobs = await storage.getJobsByCustomer(customerId);
+            const alreadyImported = existingJobs.some((j: any) => j.estimateRefId === order.id);
+            if (alreadyImported) { total--; continue; }
+
+            const job = await storage.createJob({
               customerId,
               title,
               serviceType,
@@ -418,6 +423,30 @@ export function registerRoutes(httpServer: Server, app: Express) {
               leadSource: "Square",
               estimateRefId: order.id,
             } as any);
+
+            // Also create a matching invoice so it shows on the Invoices tab
+            if (totalMoney > 0) {
+              const invoiceNumber = await storage.getNextInvoiceNumber();
+              const orderDate = createdDate || new Date().toISOString().split("T")[0];
+              await storage.createInvoice({
+                invoiceNumber,
+                customerId,
+                jobId: job.id,
+                status: "paid",
+                issueDate: orderDate,
+                dueDate: orderDate,
+                subtotal: totalMoney,
+                taxRate: 0,
+                taxAmount: 0,
+                discountAmount: 0,
+                total: totalMoney,
+                amountPaid: totalMoney,
+                balanceDue: 0,
+                notes: `Square order ${order.id}`,
+                paymentMethod: "Square",
+                squarePaymentId: order.tenders?.[0]?.id ?? order.id,
+              } as any);
+            }
             imported++;
           }
 
