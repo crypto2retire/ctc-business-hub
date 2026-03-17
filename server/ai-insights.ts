@@ -7,6 +7,7 @@ import { storage } from "./storage";
 import { getGAOverview, getGATopPages, getGATrafficSources, getGSCPerformance, getGSCQueries } from "./analytics";
 import { getGMBReviews, getGMBPerformance } from "./gmb";
 import { getAdsCampaignOverview, getAdsKeywords, getAdsSearchTerms } from "./ads";
+import { getWeatherForAI } from "./weather";
 
 const CACHE_TTL_MINUTES = 60; // AI insights refresh hourly
 
@@ -127,7 +128,7 @@ async function getRevenueSnapshot() {
 
 async function gatherAnalyticsSnapshot() {
   // Run all data fetches in parallel — they each have their own caching
-  const [ga, topPages, traffic, gsc, queries, gmb, gmbPerf, ads, keywords, searchTerms, revenue] =
+  const [ga, topPages, traffic, gsc, queries, gmb, gmbPerf, ads, keywords, searchTerms, revenue, weather] =
     await Promise.allSettled([
       getGAOverview(),
       getGATopPages(),
@@ -140,6 +141,7 @@ async function gatherAnalyticsSnapshot() {
       getAdsKeywords(),
       getAdsSearchTerms(),
       getRevenueSnapshot(),
+      getWeatherForAI(),
     ]);
 
   const val = (p: PromiseSettledResult<any>) => p.status === "fulfilled" ? p.value : null;
@@ -164,6 +166,7 @@ async function gatherAnalyticsSnapshot() {
       searchTerms: val(searchTerms),
     },
     revenue: val(revenue),
+    weather: val(weather),
   };
 }
 
@@ -274,6 +277,7 @@ Focus on:
 8. Service mix optimization — which service types generate the most revenue per job, and which are undermarketed
 9. Lead source performance — which lead sources (Google, Square, referral, etc.) bring the highest-value jobs
 10. Pipeline health — lead-to-completed conversion rate, outstanding invoices, revenue trends
+11. Weather impact — correlate severe weather days with traffic/booking drops, recommend pausing ad spend during blizzards/storms, identify post-storm demand surges (people clean up after storms = junk removal opportunity)
 
 Be SPECIFIC. Use actual numbers from the data. Reference specific competitors by name. Give step-by-step action items, not vague advice.`;
 

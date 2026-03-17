@@ -11,6 +11,7 @@ import {
 import { getGMBReviews, getGMBPerformance, getGMBPosts, getGMBQuestions, getGMBStatus } from "./gmb";
 import { getAdsCampaignOverview, getAdsKeywords, getAdsDailySpend, getAdsSearchTerms, getAdsStatus } from "./ads";
 import { generateAIInsights, getQuickHealthCheck, updateInsightStatus } from "./ai-insights";
+import { getWeatherHistory } from "./weather";
 import { insertCompetitorSchema } from "@shared/schema";
 
 export function registerRoutes(httpServer: Server, app: Express) {
@@ -798,6 +799,12 @@ export function registerRoutes(httpServer: Server, app: Express) {
     const { status } = req.body;
     const updated = await updateInsightStatus(id, status);
     res.json(updated);
+  });
+
+  // ── Weather Data ─────────────────────────────────────────────────────────────
+  app.get("/api/weather/history", async (req, res) => {
+    const days = parseInt(req.query.days as string) || 30;
+    res.json(await getWeatherHistory(days));
   });
 
   // ── Extended Analytics Status ───────────────────────────────────────────────
