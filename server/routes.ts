@@ -603,6 +603,21 @@ export function registerRoutes(httpServer: Server, app: Express) {
   app.get("/api/gmb/status", async (_req, res) => {
     res.json(getGMBStatus());
   });
+  // Debug endpoint — test Places API directly
+  app.get("/api/gmb/test-places", async (_req, res) => {
+    const placeId = process.env.GMB_PLACE_ID;
+    const apiKey = process.env.GOOGLE_PLACES_API_KEY || process.env.GOOGLE_API_KEY;
+    if (!placeId || !apiKey) return res.json({ error: "GMB_PLACE_ID or GOOGLE_PLACES_API_KEY not set", placeId: !!placeId, apiKey: !!apiKey });
+    try {
+      const url = `https://places.googleapis.com/v1/places/${placeId}?fields=displayName,rating,userRatingCount,reviews&key=${apiKey}`;
+      const r = await fetch(url, { headers: { "Content-Type": "application/json" } });
+      const text = await r.text();
+      if (!r.ok) return res.json({ error: `Places API ${r.status}`, body: text, placeId, keyPrefix: apiKey.substring(0, 8) + "..." });
+      res.json({ success: true, data: JSON.parse(text) });
+    } catch (e: any) {
+      res.json({ error: e.message });
+    }
+  });
   app.get("/api/gmb/reviews", async (_req, res) => {
     res.json(await getGMBReviews());
   });
