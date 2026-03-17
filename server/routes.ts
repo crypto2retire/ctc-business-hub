@@ -211,6 +211,115 @@ export function registerRoutes(httpServer: Server, app: Express) {
     res.json({ ok: true });
   });
 
+  // ── Send Invoice via Square ──────────────────────────────────────────────────────
+  app.post("/api/invoices/:id/send-square", async (req, res) => {
+    const id = parseInt(req.params.id);
+    const invoice = await storage.getInvoice(id);
+    if (!invoice) return res.status(404).json({ error: "Invoice not found" });
+
+    const settings = await storage.getSquareSettings();
+    if (!settings?.connected) return res.status(400).json({ error: "Square not connected" });
+    const token = settings.accessToken;
+
+    try {
+      // Get location
+      const locData: any = await squareFetch("/locations", token);
+      const locationId = locData.locations?.[0]?.id;
+      if (!locationId) throw new Error("No Square location found");
+
+      // Get customer info for the email
+      const customer = await storage.getCustomer(invoice.customerId);
+      const recipientEmail = (invoice as any).billingEmail || customer?.email;
+      if (!recipientEmail) throw new Error("No email address for this customer — add a billing email or update the customer's email");
+
+      // Get line items
+      const lineItems = await storage.getLineItems(id);
+
+      // Build Square invoice
+      const squareInvoice: any = {
+        invoice: {
+          location_id: locationId,
+          order_id: null, // We'll create an order first
+          primary_recipient: {
+            email_address: recipientEmail,
+          },
+          payment_requests: [{
+            request_type: "BALANCE",
+            due_date: invoice.dueDate,
+            automatic_payment_source: "NONE",
+          }],
+          delivery_method: "EMAIL",
+          invoice_number: invoice.invoiceNumber,
+          title: `Invoice ${invoice.invoiceNumber}`,
+          description: invoice.notes || undefined,
+          accepted_payment_methods: {
+            card: true,
+            square_gift_card: false,
+            bank_account: false,
+            buy_now_pay_later: false,
+          },
+        },
+        idempotency_key: `inv-${id}-${Date.now()}`,
+      };
+
+      // First create a Square order with the line items
+      const orderLineItems = lineItems.length > 0
+        ? lineItems.map((li: any) => ({
+            name: li.description,
+            quantity: String(Math.max(1, Math.round(li.quantity))),
+            base_price_money: {
+              amount: Math.round((li.unitPrice ?? 0) * 100),
+              currency: "USD",
+            },
+          }))
+        : [{
+            name: "Services",
+            quantity: "1",
+            base_price_money: {
+              amount: Math.round(invoice.total * 100),
+              currency: "USD",
+            },
+          }];
+
+      const orderData: any = await squareFetch("/orders", token, "POST", {
+        order: {
+          location_id: locationId,
+          line_items: orderLineItems,
+        },
+        idempotency_key: `order-inv-${id}-${Date.now()}`,
+      });
+
+      squareInvoice.invoice.order_id = orderData.order.id;
+
+      // Create the Square invoice
+      const invoiceData: any = await squareFetch("/invoices", token, "POST", squareInvoice);
+      const squareInvId = invoiceData.invoice.id;
+      const squareInvVersion = invoiceData.invoice.version;
+
+      // Publish (send) the invoice
+      await squareFetch(`/invoices/${squareInvId}/publish`, token, "POST", {
+        version: squareInvVersion,
+        idempotency_key: `pub-inv-${id}-${Date.now()}`,
+      });
+
+      // Update our local invoice with Square reference
+      await storage.updateInvoice(id, {
+        status: "sent",
+        squareInvoiceId: squareInvId,
+      } as any);
+
+      res.json({
+        success: true,
+        squareInvoiceId: squareInvId,
+        sentTo: recipientEmail,
+        message: `Invoice sent to ${recipientEmail} via Square`,
+      });
+    } catch (err: any) {
+      console.error("Square invoice send error:", err.message);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // ── Square Integration ──────────────────────────────────────────────────────────
   app.get("/api/square/status", async (_req, res) => {
     const settings = await storage.getSquareSettings();

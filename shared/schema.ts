@@ -85,13 +85,30 @@ export const invoices = pgTable("invoices", {
   subtotal: real("subtotal").notNull().default(0),
   taxRate: real("tax_rate").notNull().default(0),
   taxAmount: real("tax_amount").notNull().default(0),
-  discountAmount: real("discount_amount").notNull().default(0),
+  discountType: text("discount_type"), // "percent" | "flat" | null
+  discountValue: real("discount_value").default(0), // percentage or dollar amount
+  discountAmount: real("discount_amount").notNull().default(0), // calculated discount
   total: real("total").notNull().default(0),
   amountPaid: real("amount_paid").notNull().default(0),
   balanceDue: real("balance_due").notNull().default(0),
+  // Service address (where the work is done)
+  serviceAddress: text("service_address"),
+  serviceCity: text("service_city"),
+  serviceState: text("service_state"),
+  serviceZip: text("service_zip"),
+  // Billing address (who pays — defaults to customer address)
+  billingName: text("billing_name"),
+  billingAddress: text("billing_address"),
+  billingCity: text("billing_city"),
+  billingState: text("billing_state"),
+  billingZip: text("billing_zip"),
+  billingEmail: text("billing_email"),
   notes: text("notes"),
+  termsAndConditions: text("terms_and_conditions"),
   paymentMethod: text("payment_method"),
   squarePaymentId: text("square_payment_id"),
+  squareInvoiceId: text("square_invoice_id"),
+  sentAt: timestamp("sent_at"),
   paidAt: timestamp("paid_at"),
   createdAt: timestamp("created_at").defaultNow(),
 });
