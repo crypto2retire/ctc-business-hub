@@ -473,6 +473,53 @@ export function registerRoutes(httpServer: Server, app: Express) {
     })();
   });
 
+  // ── Backfill invoices for existing Square jobs ─────────────────────────────────
+  app.post("/api/square/backfill-invoices", async (_req, res) => {
+    try {
+      const allJobs = await storage.getJobs();
+      const allInvoices = await storage.getInvoices();
+
+      // Find Square-imported jobs that don't have a matching invoice
+      const squareJobs = allJobs.filter((j: any) => j.leadSource === "Square" && j.status === "completed");
+
+      // Build a set of jobIds that already have invoices
+      const invoicedJobIds = new Set(allInvoices.filter((i: any) => i.jobId).map((i: any) => i.jobId));
+
+      let created = 0;
+      for (const job of squareJobs) {
+        if (invoicedJobIds.has(job.id)) continue;
+        if (!job.finalPrice || job.finalPrice <= 0) continue;
+
+        const invoiceNumber = await storage.getNextInvoiceNumber();
+        const jobDate = job.scheduledDate || (job.createdAt ? new Date(job.createdAt).toISOString().split("T")[0] : new Date().toISOString().split("T")[0]);
+
+        await storage.createInvoice({
+          invoiceNumber,
+          customerId: job.customerId,
+          jobId: job.id,
+          status: "paid",
+          issueDate: jobDate,
+          dueDate: jobDate,
+          subtotal: job.finalPrice,
+          taxRate: 0,
+          taxAmount: 0,
+          discountAmount: 0,
+          total: job.finalPrice,
+          amountPaid: job.finalPrice,
+          balanceDue: 0,
+          notes: job.notes || "Backfilled from Square import",
+          paymentMethod: "Square",
+          squarePaymentId: job.estimateRefId || null,
+        } as any);
+        created++;
+      }
+
+      res.json({ success: true, invoicesCreated: created, squareJobsTotal: squareJobs.length, alreadyHadInvoices: squareJobs.length - created });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // ── Analytics (Real integrations with caching) ────────────────────────────────
 
   // Combined overview — pulls from all configured sources for the dashboard
